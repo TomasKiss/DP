@@ -3,6 +3,7 @@
     <div class="">
       <PrimeMenu/>
     </div>
+    <Toast/>
     <div class="p-grid p-flex-column main">
       <div class="p-col-12">
             <div class="main p-grid">
@@ -21,11 +22,11 @@
               <Column  field="prefix" header="Prefix"></Column>
               <Column  field="namespace" header="Namespace"></Column>
               <Column  header="Options"> 
-                <template #body="">
-                      <Button @click="openEditModal(position)" class="p-button-sm margin-right p-button-warning" v-tooltip.right="'Edit'">
+                <template #body="slotProps">
+                      <Button @click="openEditModal(position,slotProps.data.prefix)" class="p-button-sm margin-right p-button-warning" v-tooltip.right="'Edit'">
                         <i class="pi pi-pencil"></i>
                         </Button>
-                      <Button @click="confirmRemove" class="p-button-sm p-button-danger" v-tooltip.right="'Remove'">
+                      <Button @click="confirmRemove(slotProps.data.prefix)" class="p-button-sm p-button-danger" v-tooltip.right="'Remove'">
                         <i class="pi pi-trash"></i>
                         </Button>
 
@@ -39,15 +40,15 @@
             <div class="p-d-flex p-flex-column">
                 <div class="p-text-center">
                     <i class="pi pi-exclamation-triangle" style="font-size: 3rem"></i>
-                    <h4>{{slotProps.message.summary}}</h4>
-                    <p>{{slotProps.message.detail}}</p>
+                    <h4>Are you sure you want to remove this namespace?</h4>
+                    <p></p>
                 </div>
                 <div class="p-grid p-fluid">
                     <div class="p-col-6">
-                        <Button class="p-button-success" label="Yes" @click="onConfirm" />
+                        <Button class="p-button-success" label="Yes" @click="onConfirmRemove(slotProps.message.prefix)" />
                     </div>
                     <div class="p-col-6">
-                        <Button class="p-button-secondary" label="No" @click="onReject" />
+                        <Button class="p-button-secondary" label="No" @click="onRejectRemove" />
                     </div>
                 </div>
             </div>
@@ -58,11 +59,11 @@
       <div class="p-fluid">
           <div class="p-field">
               <label for="prefix">Prefix</label>
-              <InputText id="prefix" type="text" />
+              <InputText id="prefixC" type="text" v-model="newNSprefix"/>
           </div>
           <div class="p-field">
               <label for="namespace">Namespace</label>
-              <InputText id="namespace" type="text" />
+              <InputText id="namespaceC" type="text" v-model="newNSname"/>
           </div>
       </div>
       <template #footer>
@@ -70,15 +71,11 @@
       </template>
     </Dialog>
 
-    <Dialog header="Edit Namespace" v-model:visible="displayEditModal" :style="{width: '50vw'}" :position="position" :modal="true">
+    <Dialog :header="`Edit namespace for prefix: ${prefixEditNS}`" v-model:visible="displayEditModal" :style="{width: '50vw'}" :position="position" :modal="true">
       <div class="p-fluid">
           <div class="p-field">
-              <label for="prefix">Prefix</label>
-              <InputText id="prefix" type="text" />
-          </div>
-          <div class="p-field">
-              <label for="namespace">Namespace</label>
-              <InputText id="namespace" type="text" />
+              <label for="namespace">New Namespace</label>
+              <InputText id="namespaceE" type="text" v-model="editedNSname"/>
           </div>
       </div>
       <template #footer>
@@ -113,38 +110,113 @@ export default {
   },
   data() {
     return {
+      // namesapce info for repository
       data: null,
       tableData: {"data":[]},
+      // modal properties
       displayCreateModal: false,
       displayEditModal: false,
-      position:'top'
+      position:'top',
+      // namespace creation data
+      newNSname:'',
+      newNSprefix:'',
+      // prefix for wich the namespace will be edited
+      prefixEditNS:'',
+      editedNSname:''
     }
   },
   async mounted() {
     this.queryAllNamespaces()
   },
   methods:{
-    confirmRemove(){
-      this.$toast.add({severity: 'warn', summary: 'Are you sure?', detail: 'Proceed to confirm', group: 'bc'});
+    // open toast to confirm removal of namespace
+    confirmRemove(prefixToRemove){
+      this.$toast.add({severity: 'warn', prefix: prefixToRemove, group: 'bc'});
     },
-    onConfirm() {
+    // removal of namespace after confirmation
+    async onConfirmRemove(prefixToRemove) {
+      const res = await fetch('http://127.0.0.1:8080/rdf4j-server/repositories/1/namespaces/'+prefixToRemove,{
+        method: 'DELETE',
+      })
+      .then(
+        this.$toast.add({severity:'success', summary: 'Successfully removed', detail:'Namespaces was removed.', life: 3000}),
+        this.tableData.data = this.tableData.data.filter(item => item.prefix != prefixToRemove)
+      )
+      .catch(error =>
+        this.$toast.add({severity:'error', summary: 'Error', detail:error, life: 3000})
+      )
+      this.$toast.removeGroup('bc')
+    
+    },
+    // removal of namespace was rejected, close toast
+    onRejectRemove() {
       this.$toast.removeGroup('bc');
     },
-    onReject() {
-      this.$toast.removeGroup('bc');
-    },
+    // opening and positioning modal for namespace creation
     openCreateModal(position) {
       this.position = position;
       this.displayCreateModal = true;
     },
-    openEditModal(position) {
+    // opening and positioning modal for namespace edition
+    openEditModal(position,prefix) {
       this.position = position;
+      this.prefixEditNS = prefix;
+      this.editedNSname = this.tableData.data[this.tableData.data.findIndex(item => item.prefix === this.prefixEditNS)].namespace;
       this.displayEditModal = true;
     },
-    closeCreateModal() {
-      this.displayCreateModal = false;
+    // Function to close modal and create new namespace in repository
+    async closeCreateModal() {
+      if(this.newNSname !== '' && this.newNSprefix !== ''){
+        // TODO: Controll if namespace/prefix already exists ???
+        // TODO: Controll if namespace/prefix correct format ???
+
+        const res = await fetch('http://127.0.0.1:8080/rdf4j-server/repositories/1/namespaces/'+this.newNSprefix,{
+          method: 'PUT',
+          headers:{
+            'Content-Type': 'text/plain'
+          },
+          body:this.newNSname  
+        }).then(
+          this.$toast.add({severity:'success', summary: 'Success creation', detail:'New namespaces created', life: 3000}),
+          this.tableData.data.push({
+            'prefix': this.newNSprefix,
+            'namespace': this.newNSname
+          }),
+          // clearing inputtext values
+          this.newNSname = '',
+          this.newNSprefix = '',
+
+        ).catch(error =>
+          this.$toast.add({severity:'error', summary: 'Error', detail:error, life: 3000})
+        )
+        
+        this.displayCreateModal = false;
+      }
+
     },
-    closeEditModal() {
+    // function to close edit modal and execute update of the given namespace
+    async closeEditModal() {
+      // TODO: Controll if namespace is given???
+      if(this.prefixEditNS !== ''){
+          const res = await fetch('http://127.0.0.1:8080/rdf4j-server/repositories/1/namespaces/'+this.prefixEditNS,{
+          method: 'PUT',
+          headers:{
+            'Content-Type': 'text/plain'
+          },
+          body:this.editedNSname 
+        }).then(
+          this.$toast.add({severity:'success', summary: 'Successfull edit', detail:'Namespace successfully updated!', life: 3000}),
+          this.tableData.data[this.tableData.data.findIndex(item => item.prefix === this.prefixEditNS)].namespace = this.editedNSname,
+
+          // clearing inputtext values
+          this.prefixEditNS = '',
+          this.editedNSname = '',
+
+        ).catch(error =>
+          this.$toast.add({severity:'error', summary: 'Error', detail:error, life: 3000})
+        )
+      }
+
       this.displayEditModal = false;
     },
     async queryAllNamespaces(){
