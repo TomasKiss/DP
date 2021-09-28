@@ -20,21 +20,25 @@ export default {
         InputText
     },
     data() {
-        return {
-            items:[
-                {
-                  label: 'Editor',
-                  icon: 'pi pi-pencil',
-                  to:{name: 'Home'}      
-                },
-                {
-                  label: 'Namespaces',
-                  icon: 'pi pi-list',
-                  to:{name: 'Namespaces'}      
-
-                }
-            ],
-        }
+      return {
+        items:[
+            // {
+            //   label: 'Repositories',
+            //   icon: 'pi pi-folder',
+            //   to:{name: 'Repositories'}        
+            // },
+            {
+              label: 'Editor',
+              icon: 'pi pi-pencil',
+              to:{name: 'Home'}      
+            },
+            {
+              label: 'Namespaces',
+              icon: 'pi pi-list',
+              to:{name: 'Namespaces'}      
+            }
+        ],
+      }
     },
 }
 </script>

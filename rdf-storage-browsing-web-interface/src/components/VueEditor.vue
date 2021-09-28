@@ -1,8 +1,8 @@
 <template>
   <Toast />
-  <table style="width:100%">
+  <table class="error_td" style="width:100%;border: 2px solid black;">
     <tr>
-      <td style="width:95%">
+      <td style="width:95%;">
         <prism-editor class="my-editor" v-model="code" :highlight="highlighter" line-numbers></prism-editor>
       </td>
       <td>
@@ -14,8 +14,8 @@
       </td>
     </tr>
   </table>
-  <div style="text-align:center">
-    <Button @click="queryData" label="Query" class="p-button-sm" />
+  <div style="text-align:center;margin-top:10px;">
+    <Button @click="queryData" label="Execute" class="p-button-sm" />
   </div>
 </template>
 
@@ -162,7 +162,11 @@
     font-size: 14px;
     line-height: 1.5;
     padding: 5px;
+    min-height:20vh;
+  }
 
+  .error_td{
+    background: #f5f2f0;
   }
 
   /* optional class for removing the outline */
