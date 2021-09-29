@@ -96,7 +96,7 @@ import Button from 'primevue/button';
 import Toast from 'primevue/toast';
 import Dialog from 'primevue/dialog';
 import InputText from 'primevue/inputtext';
-
+// TODO: create a smaller component and leave hre just its call
 export default {
   name: 'Namespaces',
   components: {
@@ -221,23 +221,29 @@ export default {
     },
     async queryAllNamespaces(){
       this.data = await fetch('http://127.0.0.1:8080/rdf4j-server/repositories/1/namespaces', {
-            method: 'GET',
-            headers: {
-              'Accept':'application/json',
-            },
-          })
-          .then(res => {
-            return res.json()})
-          .catch((error) => console.log(error))
+          method: 'GET',
+          headers: {
+            'Accept':'application/json',
+          },
+        })
+        .then(res => this.errorHandler(res))
+        .catch((error) => console.log(error))
 
-        for (let index = 0; index < this.data.results.bindings.length; index++) {
-          this.tableData.data.push({
-            'prefix': this.data.results.bindings[index].prefix.value,
-            'namespace': this.data.results.bindings[index].namespace.value
-            
-          })
+      for (let index = 0; index < this.data.results.bindings.length; index++) {
+        this.tableData.data.push({
+          'prefix': this.data.results.bindings[index].prefix.value,
+          'namespace': this.data.results.bindings[index].namespace.value
           
-        }
+        })
+        
+      }
+    },
+    async errorHandler(res){
+      if(!res.ok){
+        this.$toast.add({severity:'error', summary: 'Error', detail:"Error happened during execution!", life: 3000});
+      } else {
+        return await res.json()
+      }
     }
   }
 }
