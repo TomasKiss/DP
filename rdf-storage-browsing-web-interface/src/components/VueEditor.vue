@@ -1,16 +1,27 @@
 <template>
   <Toast />
-  <table class="error_td" style="width:100%;border: 2px solid black;">
+  <!-- TODO: height setting -->
+  <table class="error_td" style="width:100%; border: 2px solid black; min-height:20vh;">
     <tr>
-      <td style="width:95%;">
-        <prism-editor class="my-editor" v-model="code" :highlight="highlighter" line-numbers :key="render"></prism-editor>
+      <th class="text_left padding_set" v-if="htmlCode.length">
+        Namespaces:
+      </th>
+    </tr>  
+    <tr v-for="(n,j) in htmlCode" :key="j">
+      <!-- tds representing namespaces with prefixes -->
+      <td class="text_left width_95 padding_set font_style" :id="`td-${j}`"></td>
+    </tr>
+
+    <tr>
+      <td class="width_95">
+        <prism-editor class="my-editor" v-model="code" :highlight="highlighter" line-numbers></prism-editor>
       </td>
       <td>
-          <tr v-for="i in newRowsCount" :key="i" :id="i-oldRowsCount+1" style="visibility: hidden">
-            <td v-tooltip.right="errorText" class="error_td_size">
-              <i style="color:red" class="pi pi-times-circle"></i>
-            </td>
-          </tr>
+        <tr v-for="i in newRowsCount" :key="i" :id="i-oldRowsCount+1" style="visibility: hidden">
+          <td v-tooltip.right="errorText" class="">
+            <i style="color:red" class="pi pi-times-circle"></i>
+          </td>
+        </tr>
       </td>
     </tr>
   </table>
@@ -39,7 +50,8 @@
   import Button from 'primevue/button';
   import Tooltip from 'primevue/tooltip';
   import Toast from 'primevue/toast';
-
+  import Textarea from 'primevue/textarea';
+  
   // Sparql parser to validate query
   import Sparqljs from 'sparqljs'
 
@@ -50,12 +62,15 @@
       PrismEditor,
       Button,
       Toast,
+      Textarea,
     },
     directives: {
       'tooltip': Tooltip
     },
     data: () => ({ 
-      code2: "PREFIX : <http://stardog.com/tutorial/> \n PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> \n SELECT ?album \n WHERE { ?album rdf:type :Album .}",
+      // sytax highlited html code representing prefixes in editor 
+      htmlCode:[],
+      value: "PREFIX : <http://stardog.com/tutorial/> \n PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> \n SELECT ?album \n WHERE { ?album rdf:type :Album .}",
       // query entered by user
       code: "",//\n\n\n\n\n\n
       // if the sytax is valid
@@ -72,7 +87,8 @@
       parser: new Sparqljs.Parser(),
       // already added prefixes TODO: find better word
       alreadyAddedPrefs:[],
-      render:0
+      // prfix declarations to prepend to the query
+      prefixTextDecls: [],
     }),
     mounted() {
       this.queryAllNamespaces();
@@ -85,13 +101,15 @@
           this.oldRowsCount = this.newRowsCount+1; // old 6 new 5
         } 
 
-        let codeN = this.searchPrefixesToComplete(code)
-        codeN.split("\n").forEach(element => {
+        this.searchPrefixesToComplete(code)
+        this.setTdInnerHtml()
+        
+
+        code.split("\n").forEach(_ => {
           this.newRowsCount++
         })
 
-        let highlightedCode = highlight(codeN, languages.sparql); // languages.<insert language> to return html with markup 
-        console.log("high",highlightedCode)
+        let highlightedCode = highlight(code, languages.sparql); // languages.<insert language> to return html with markup 
 
         return highlightedCode
       },
@@ -117,18 +135,23 @@
             'namespace': data.results.bindings[index].namespace.value
           })
         }
-        // console.log(this.prefixNsTuples)
       },
       // executing user given query
       async queryData(){
-        // syntach validation
-        this.validateQuery(this.code, this.parser);
+
+        // concating prefixes with query body
+        let queryText = this.code;
+        this.prefixTextDecls.forEach(element => {
+          queryText = element.code + queryText;
+        });
+  
+        // syntax validation
+        this.validateQuery(queryText, this.parser);
 
         let answerToQuery;
-        let err;
         if(this.valide){
           // CORS headers (filter) have to set in tomcat 9 web.xml file 
-          answerToQuery = await fetch('http://127.0.0.1:8080/rdf4j-server/repositories/1?query='+encodeURIComponent(this.code), {
+          answerToQuery = await fetch('http://127.0.0.1:8080/rdf4j-server/repositories/1?query='+encodeURIComponent(queryText), {
             method: 'GET',
             headers: {
               'Accept':'application/json',
@@ -140,7 +163,6 @@
           .catch(error => 
             this.$toast.add({severity:'error', summary: 'Error', detail:error, life: 3000}),
           )
-          console.log(answerToQuery)
           this.valide = !this.valide
         }
 
@@ -161,9 +183,6 @@
           const indxOfColon = this.errorText.indexOf(':')
           const rowNumWithError = this.errorText.substring(nthIndxOfSpace,indxOfColon) 
 
-          console.log(rowNumWithError)
-          console.log(error.message)
-
           // handling if in the error.message the line number is not specified
           if(!isNaN(rowNumWithError)){
             // line number is present
@@ -176,11 +195,7 @@
       },
       // function to remove error icon placeholder divs from document 
       deleteDivs(){
-        // console.log('oldC', this.oldRowsCount);
-        // console.log('newC', this.newRowsCount);
-        // console.log('deleteDiv', this.newRowsCount-this.oldRowsCount+1);
         for (let index = 1; index <= this.newRowsCount-this.oldRowsCount+1; index++) {
-          // console.log('index',index)
           document.getElementById(index).remove()  
         }
       },
@@ -206,29 +221,70 @@
       },
       // automatic completion of prefixes
       searchPrefixesToComplete(code){
-        
+        let newlyFoundPrefs = [];
         if(code.length > 0 && code.match(/([a-z][A-Z][0-9])*\w+/g)){
+          // search for possible prefixes in the user given query
           const matched = code.match(/([a-z][A-Z])*\w*:([a-z][A-Z][0-9])*\w+/g); 
-          // console.log(matched);
           if(matched){
+            // controll if the matched words are correct prefixes
             matched.forEach(element => {
               const prefix = element.substring(0,element.indexOf(":"));
-              // console.log('prefix',prefix);
-              // console.log("include",this.alreadyAddedPrefs.includes(prefix))
-              if(!this.alreadyAddedPrefs.includes(prefix)){
-                const ns = this.prefixNsTuples.filter(i => i.prefix == prefix)[0].namespace;
-                // console.log('ns',ns);
-                this.alreadyAddedPrefs.push(prefix);
-                code = "PREFIX " + prefix +": <" +ns+ ">\r\n"+code; 
-                document.getElementsByClassName('prism-editor__textarea')[0].value = code; 
-                console.log("a",document.getElementsByClassName('prism-editor__textarea')[0].value);  
+              const ns = this.prefixNsTuples.filter(i => i.prefix == prefix)[0];
+
+              // prepeare proper html code to visualise prefix in the editor for the user
+              if(ns && !newlyFoundPrefs.includes(prefix)){
+                // this.alreadyAddedPrefs.push(prefix);
+                newlyFoundPrefs.push(prefix);
+                if(!this.alreadyAddedPrefs.includes(prefix)){
+                  // store text representation of prefix
+                  this.prefixTextDecls.push({
+                    "prefix":prefix,
+                    "code":"PREFIX " + prefix +": <" +ns.namespace+ ">"
+                  })
+                  // highlight the html code
+                  let highlightedCode = highlight("PREFIX " + prefix +": <" +ns.namespace+ ">", languages.sparql);
+                  this.htmlCode.push({
+                    "prefix":prefix,
+                    "code":highlightedCode});
+                  }
               }
+
             })
+
+            // controll which previous prefixes are not present in the query
+            this.alreadyAddedPrefs.forEach(e => {
+              if(!newlyFoundPrefs.includes(e)) {
+                this.htmlCode = this.htmlCode.filter(i => i.prefix !== e);
+                this.prefixTextDecls = this.prefixTextDecls.filter(i => i.prefix !== e);              
+              } 
+            });
+
+            // save all present prefixes
+            this.alreadyAddedPrefs = newlyFoundPrefs;
+          } else { 
+            // clear html code after user deleting all prefixes from editor
+            this.htmlCode = [];
           }
         } else {
+          // no prefix found in the query
           this.alreadyAddedPrefs = [];
+          this.htmlCode = [];
+          this.prefixTextDecls = []; 
         }
-        return code;
+      },
+
+      setTdInnerHtml(){
+        // wait until DOM is re-rendered
+        this.$nextTick(()=>{
+         
+          if(this.htmlCode.length>0){
+            // set the inner HTML of the td = show the namespace with prefix to the user
+            this.htmlCode.forEach((e,i) => {
+              document.getElementById('td-'+(i)).innerHTML = e.code;
+            });
+          }
+        }
+      )
       }
     },
   };
@@ -247,7 +303,7 @@
     line-height: 1.5;
     padding: 5px;
     /* padding-top:35px; */
-    min-height:20vh;
+    /* min-height:20vh; */
   }
 
   .error_td{
@@ -256,11 +312,32 @@
   
   .error_td_size{
     font-size: 14px;
+    padding: 5px;
     line-height: 1.5;
+    height:100%;
   }
 
   /* optional class for removing the outline */
   .prism-editor__textarea:focus {
     outline: none;
+  }
+
+  .text_left{
+    text-align:left;
+  }
+
+  .width_95{
+    width:95%;
+  }
+
+  .padding_set{
+    padding:0 25px;
+    padding-top:5px;
+  }
+
+  .font_style{
+    font-family: Fira code, Fira Mono, Consolas, Menlo, Courier, monospace;
+    font-size: 14px;
+    line-height: 1.5;
   }
 </style>
