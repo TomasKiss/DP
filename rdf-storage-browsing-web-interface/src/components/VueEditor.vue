@@ -1,7 +1,7 @@
 <template>
   <Toast />
   <!-- TODO: height setting -->
-  <table class="error_td" style="width:100%; border: 2px solid black; min-height:20vh;">
+  <table class="common_bgc" style="width:100%; border: 2px solid black; min-height:20vh;">
     <tr>
       <th class="text_left padding_set" v-if="htmlCode.length">
         Namespaces:
@@ -64,6 +64,7 @@
       Toast,
       Textarea,
     },
+    emits: ['resultReturn'],
     directives: {
       'tooltip': Tooltip
     },
@@ -164,6 +165,8 @@
             this.$toast.add({severity:'error', summary: 'Error', detail:error, life: 3000}),
           )
           this.valide = !this.valide
+          console.log(answerToQuery);
+          this.$emit('resultReturn', {answerToQuery});
         }
 
       },
@@ -302,11 +305,14 @@
     font-size: 14px;
     line-height: 1.5;
     padding: 5px;
+    position: absolute;
+    left: 0;
+    top:0;
     /* padding-top:35px; */
     /* min-height:20vh; */
   }
 
-  .error_td{
+  .common_bgc{
     background: #f5f2f0;
   }
   
@@ -328,6 +334,7 @@
 
   .width_95{
     width:95%;
+    position:relative;
   }
 
   .padding_set{
