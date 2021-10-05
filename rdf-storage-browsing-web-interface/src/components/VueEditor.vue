@@ -55,7 +55,8 @@
   // Sparql parser to validate query
   import Sparqljs from 'sparqljs'
 
-
+  import { config } from '../../config';
+  
   export default {
     name:'App',
     components: {
@@ -64,7 +65,7 @@
       Toast,
       Textarea,
     },
-    emits: ['resultReturn'],
+    emits: ['resultReturn','loadingResult'],
     directives: {
       'tooltip': Tooltip
     },
@@ -116,7 +117,7 @@
       },
       // fetching all namespaces present in the repository
       async queryAllNamespaces(){
-        const data = await fetch('http://127.0.0.1:8080/rdf4j-server/repositories/1/namespaces', {
+        const data = await fetch(config.server_url+'rdf4j-server/repositories/1/namespaces', {
             method: 'GET',
             headers: {
               'Accept':'application/json',
@@ -151,8 +152,11 @@
 
         let answerToQuery;
         if(this.valide){
+          // emit that the fetching of data started, so show spinner
+          this.$emit('loadingResult', true);
           // CORS headers (filter) have to set in tomcat 9 web.xml file 
-          answerToQuery = await fetch('http://127.0.0.1:8080/rdf4j-server/repositories/1?query='+encodeURIComponent(queryText), {
+          answerToQuery = await fetch(config.server_url
+              +'rdf4j-server/repositories/1?query='+encodeURIComponent(queryText), {
             method: 'GET',
             headers: {
               'Accept':'application/json',
@@ -166,7 +170,12 @@
           )
           this.valide = !this.valide
           console.log(answerToQuery);
-          this.$emit('resultReturn', {answerToQuery});
+          // emit that the fetching of data ended, so hide spinner
+          this.$emit('loadingResult', false);
+          // emit answer if everything was OK
+          if(answerToQuery) {
+            this.$emit('resultReturn', {answerToQuery});
+          }
         }
 
       },

@@ -4,36 +4,44 @@
       <PrimeMenu/>
     </div>
     <Toast/>
-    <div class="p-grid p-flex-column main">
-      <div class="p-col-12">
-            <div class="main p-grid">
-              <div class="p-col">
-                <h1>Namespaces </h1>
+    <div v-if="!loading">
+      <div class="p-grid p-flex-column main">
+        <div class="p-col-12">
+              <div class="main p-grid">
+                <div class="p-col">
+                  <h1>Prefix declarations </h1>
+                </div>
+                <div class="p-col-fixed">
+                  <Button @click="openCreateModal(position)" class="p-button-sm p-button-info size" v-tooltip.right="'Create new namespace'">
+                    <i class="pi pi-plus"></i>
+                    </Button>
+                </div>
               </div>
-              <div class="p-col-fixed">
-                <Button @click="openCreateModal(position)" class="p-button-sm p-button-info size" v-tooltip.right="'Create new namespace'">
-                  <i class="pi pi-plus"></i>
-                  </Button>
-              </div>
-            </div>
-      </div>  
-      <div class="p-col-12" style="">
-          <DataTable  :value="tableData.data" responsiveLayout="scroll">
-              <Column  field="prefix" header="Prefix"></Column>
-              <Column  field="namespace" header="Namespace"></Column>
-              <Column  header="Options"> 
-                <template #body="slotProps">
-                      <Button @click="openEditModal(position,slotProps.data.prefix)" class="p-button-sm margin-right p-button-warning" v-tooltip.right="'Edit'">
-                        <i class="pi pi-pencil"></i>
-                        </Button>
-                      <Button @click="confirmRemove(slotProps.data.prefix)" class="p-button-sm p-button-danger" v-tooltip.right="'Remove'">
-                        <i class="pi pi-trash"></i>
-                        </Button>
+        </div>  
+        <div class="p-col-12" style="">
+            <DataTable  :value="tableData.data" responsiveLayout="scroll">
+                <Column  field="prefix" header="Prefix"></Column>
+                <Column  field="namespace" header="Namespace"></Column>
+                <Column  header="Options"> 
+                  <template #body="slotProps">
+                        <Button @click="openEditModal(position,slotProps.data.prefix)" class="p-button-sm margin-right p-button-warning" v-tooltip.right="'Edit'">
+                          <i class="pi pi-pencil"></i>
+                          </Button>
+                        <Button @click="confirmRemove(slotProps.data.prefix)" class="p-button-sm p-button-danger" v-tooltip.right="'Remove'">
+                          <i class="pi pi-trash"></i>
+                          </Button>
 
-                </template>
-              </Column>
-          </DataTable>
+                  </template>
+                </Column>
+            </DataTable>
+        </div>
       </div>
+    </div>
+    <div v-else>
+      <div class="">
+        <h1>Fetching Data</h1>
+      </div>
+      <img :src="require('../assets/hourglass.gif')" alt="" class="" />
     </div>
     <Toast position="bottom-center" group="bc">
         <template #message="slotProps">
@@ -96,7 +104,8 @@ import Button from 'primevue/button';
 import Toast from 'primevue/toast';
 import Dialog from 'primevue/dialog';
 import InputText from 'primevue/inputtext';
-// TODO: create a smaller component and leave hre just its call
+import {config} from '../../config'
+// TODO: create a smaller component and leave here just its call
 export default {
   name: 'Namespaces',
   components: {
@@ -122,11 +131,15 @@ export default {
       newNSprefix:'',
       // prefix for wich the namespace will be edited
       prefixEditNS:'',
-      editedNSname:''
+      editedNSname:'',
+      loading: true,
+
     }
   },
   async mounted() {
-    this.queryAllNamespaces()
+    this.loading = true;
+    this.queryAllNamespaces();
+    this.loading = false;
   },
   methods:{
     // open toast to confirm removal of namespace
@@ -135,7 +148,7 @@ export default {
     },
     // removal of namespace after confirmation
     async onConfirmRemove(prefixToRemove) {
-      const res = await fetch('http://127.0.0.1:8080/rdf4j-server/repositories/1/namespaces/'+prefixToRemove,{
+      const res = await fetch(config.server_url+'rdf4j-server/repositories/1/namespaces/'+prefixToRemove,{
         method: 'DELETE',
       })
       .then(
@@ -170,7 +183,7 @@ export default {
         // TODO: Controll if namespace/prefix already exists ???
         // TODO: Controll if namespace/prefix correct format ???
 
-        const res = await fetch('http://127.0.0.1:8080/rdf4j-server/repositories/1/namespaces/'+this.newNSprefix,{
+        const res = await fetch(config.server_url+'rdf4j-server/repositories/1/namespaces/'+this.newNSprefix,{
           method: 'PUT',
           headers:{
             'Content-Type': 'text/plain'
@@ -198,7 +211,7 @@ export default {
     async closeEditModal() {
       // TODO: Controll if namespace is given???
       if(this.prefixEditNS !== ''){
-          const res = await fetch('http://127.0.0.1:8080/rdf4j-server/repositories/1/namespaces/'+this.prefixEditNS,{
+          const res = await fetch(config.server_url+'rdf4j-server/repositories/1/namespaces/'+this.prefixEditNS,{
           method: 'PUT',
           headers:{
             'Content-Type': 'text/plain'
@@ -220,7 +233,7 @@ export default {
       this.displayEditModal = false;
     },
     async queryAllNamespaces(){
-      this.data = await fetch('http://127.0.0.1:8080/rdf4j-server/repositories/1/namespaces', {
+      this.data = await fetch(config.server_url+'rdf4j-server/repositories/1/namespaces', {
           method: 'GET',
           headers: {
             'Accept':'application/json',
