@@ -42,7 +42,7 @@
   import { highlight, languages } from 'prismjs/components/prism-core';
   import 'prismjs/components/prism-clike';
   import 'prismjs/components/prism-javascript';
-  // !!!!!!!!!!!!!!!!!!!!! turtle was needed as dependenci
+  // !!!!!!!!!!!!!!!!!!!!! turtle was needed as dependency
   import 'prismjs/components/prism-turtle'; 
   import 'prismjs/components/prism-sparql'; 
 
@@ -73,26 +73,26 @@
       'tooltip': Tooltip
     },
     data: () => ({ 
-      // sytax highlited html code representing prefixes in editor 
+      // syntax highlighted html code representing prefixes in editor 
       htmlCode:[],
       code1: "SELECT ?a \n WHERE { ?a rdf:type :Album .}",
       // query entered by user
       code: "",//\n\n\n\n\n\n
-      // if the sytax is valid
-      valide: false,
-      // array containing all prefix and namespace tupples
+      // if the syntax is valid
+      valid: false,
+      // array containing all prefix and namespace tuples
       prefixNsTuples: [],
       // number of rows in the query
       newRowsCount: 0,
       // number of rows in query before its change
       oldRowsCount: 1,
-      // text of the error found during sytnach check
+      // text of the error found during syntax check
       errorText: ' ',
       // parser used for query validation
       parser: new Sparqljs.Parser(),
       // already added prefixes TODO: find better word
       alreadyAddedPrefs:[],
-      // prfix declarations to prepend to the query
+      // prefix declarations to prepend to the query
       prefixTextDecls: [],
     }),
     mounted() {
@@ -133,7 +133,7 @@
           })
           .catch((error) => console.log(error))
 
-        // storing namespaces with corresponding prefixes as tupples
+        // storing namespaces with corresponding prefixes as tuples
         for (let index = 0; index < data.results.bindings.length; index++) {
           this.prefixNsTuples.push({
             'prefix': data.results.bindings[index].prefix.value,
@@ -144,7 +144,7 @@
       // executing user given query
       async queryData(){
 
-        // concating prefixes with query body
+        // connect prefixes with query body
         let queryText = this.code;
         this.prefixTextDecls.forEach(element => {
           queryText = element.code + queryText;
@@ -154,7 +154,7 @@
         this.validateQuery(queryText, this.parser);
 
         let answerToQuery;
-        if(this.valide){
+        if(this.valid){
           // emit that the fetching of data started, so show spinner
           this.$emit('loadingResult', true);
           // CORS headers (filter) have to set in tomcat 9 web.xml file 
@@ -171,15 +171,18 @@
           .catch(error => 
             this.$toast.add({severity:'error', summary: 'Error', detail:error, life: 3000}),
           )
-          this.valide = !this.valide
+          this.valid = !this.valid
           console.log(answerToQuery);
           // console.log("answer test ",answerToQuery.results.bindings[0].a);
           // emit that the fetching of data ended, so hide spinner
           this.$emit('loadingResult', false);
-          // emit answer if everything was OK
-          if(answerToQuery) {
+          // emit answer if everything was OK and data was found
+          if(answerToQuery.results.bindings.length > 0) {
             let data = [answerToQuery, this.prefixNsTuples];
             this.$emit('resultReturn', {data});
+          } else {
+            // no data found for the query
+            this.$toast.add({severity:'warn', summary: 'Warn Message', detail:'Query was successful but no data found!', life: 5000});
           }
         }
 
@@ -190,7 +193,7 @@
         try {
           // syntax validation by parser
           let parsed = parser.parse(code)
-          this.valide = true
+          this.valid = true
           this.errorText = ' '
         } catch (error) {
           // parsing the number of the line on which the error is
@@ -216,8 +219,8 @@
           document.getElementById(index).remove()  
         }
       },
-      // searching for the nth occurence of pattern in string
-      // returns index of the occurence
+      // searching for the nth occurrence of pattern in string
+      // returns index of the occurrence
       nthIndex(str, pat, n){
           var L= str.length, i= -1;
           while(n-- && i++<L){
@@ -226,7 +229,7 @@
           }
           return i;
       },
-      // controling if server response conatinas error
+      // controlling if server response contains error
       async errorHandler(res){
         if(!res.ok){
           // something went wrong on server (status like: 4xx or 5xx, ...)
@@ -243,12 +246,12 @@
           // search for possible prefixes in the user given query
           const matched = code.match(/([a-z][A-Z])*\w*:([a-z][A-Z][0-9])*\w+/g); 
           if(matched){
-            // controll if the matched words are correct prefixes
+            // control if the matched words are correct prefixes
             matched.forEach(element => {
               const prefix = element.substring(0,element.indexOf(":"));
               const ns = this.prefixNsTuples.filter(i => i.prefix == prefix)[0];
 
-              // prepeare proper html code to visualise prefix in the editor for the user
+              // prepare proper html code to visualize prefix in the editor for the user
               if(ns && !newlyFoundPrefs.includes(prefix)){
                 // this.alreadyAddedPrefs.push(prefix);
                 newlyFoundPrefs.push(prefix);
@@ -268,7 +271,7 @@
 
             })
 
-            // controll which previous prefixes are not present in the query
+            // control which previous prefixes are not present in the query
             this.alreadyAddedPrefs.forEach(e => {
               if(!newlyFoundPrefs.includes(e)) {
                 this.htmlCode = this.htmlCode.filter(i => i.prefix !== e);
@@ -310,7 +313,7 @@
 <style>
   /* required class */
   .my-editor {
-    /* we dont use `language-` classes anymore so thats why we need to add background and text color manually */
+    /* we don't use `language-` classes anymore so thats why we need to add background and text color manually */
     background: #f5f2f0;
     /* color: #5faac9; */
 
