@@ -119,7 +119,7 @@ export default {
   },
   data() {
     return {
-      // namesapce info for repository
+      // namespace info for repository
       data: null,
       tableData: {"data":[]},
       // modal properties
@@ -129,7 +129,7 @@ export default {
       // namespace creation data
       newNSname:'',
       newNSprefix:'',
-      // prefix for wich the namespace will be edited
+      // prefix for which the namespace will be edited
       prefixEditNS:'',
       editedNSname:'',
       loading: true,
@@ -180,8 +180,8 @@ export default {
     // Function to close modal and create new namespace in repository
     async closeCreateModal() {
       if(this.newNSname !== '' && this.newNSprefix !== ''){
-        // TODO: Controll if namespace/prefix already exists ???
-        // TODO: Controll if namespace/prefix correct format ???
+        // TODO: Control if namespace/prefix already exists ???
+        // TODO: Control if namespace/prefix correct format ???
 
         const res = await fetch(config.server_url+'rdf4j-server/repositories/1/namespaces/'+this.newNSprefix,{
           method: 'PUT',
@@ -209,7 +209,7 @@ export default {
     },
     // function to close edit modal and execute update of the given namespace
     async closeEditModal() {
-      // TODO: Controll if namespace is given???
+      // TODO: Control if namespace is given???
       if(this.prefixEditNS !== ''){
           const res = await fetch(config.server_url+'rdf4j-server/repositories/1/namespaces/'+this.prefixEditNS,{
           method: 'PUT',
@@ -218,10 +218,10 @@ export default {
           },
           body:this.editedNSname 
         }).then(
-          this.$toast.add({severity:'success', summary: 'Successfull edit', detail:'Namespace successfully updated!', life: 3000}),
+          this.$toast.add({severity:'success', summary: 'Successful edit', detail:'Namespace successfully updated!', life: 3000}),
           this.tableData.data[this.tableData.data.findIndex(item => item.prefix === this.prefixEditNS)].namespace = this.editedNSname,
 
-          // clearing inputtext values
+          // clearing input text values
           this.prefixEditNS = '',
           this.editedNSname = '',
 
