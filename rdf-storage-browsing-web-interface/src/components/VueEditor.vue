@@ -1,6 +1,9 @@
 <template>
   <Toast />
   <!-- TODO: height setting -->
+  <div class="p-col text_left">
+    <h1>Editor</h1>
+  </div>
   <table class="common_bgc" style="width:100%; border: 2px solid black; min-height:20vh;">
     <tr>
       <th class="text_left padding_set" v-if="htmlCode.length">
@@ -72,7 +75,7 @@
     data: () => ({ 
       // sytax highlited html code representing prefixes in editor 
       htmlCode:[],
-      value: "PREFIX : <http://stardog.com/tutorial/> \n PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> \n SELECT ?album \n WHERE { ?album rdf:type :Album .}",
+      code1: "SELECT ?a \n WHERE { ?a rdf:type :Album .}",
       // query entered by user
       code: "",//\n\n\n\n\n\n
       // if the sytax is valid
@@ -170,11 +173,13 @@
           )
           this.valide = !this.valide
           console.log(answerToQuery);
+          // console.log("answer test ",answerToQuery.results.bindings[0].a);
           // emit that the fetching of data ended, so hide spinner
           this.$emit('loadingResult', false);
           // emit answer if everything was OK
           if(answerToQuery) {
-            this.$emit('resultReturn', {answerToQuery});
+            let data = [answerToQuery, this.prefixNsTuples];
+            this.$emit('resultReturn', {data});
           }
         }
 
@@ -316,7 +321,7 @@
     padding: 5px;
     position: absolute;
     left: 0;
-    top:0;
+    top: 0;
     /* padding-top:35px; */
     /* min-height:20vh; */
   }
@@ -329,7 +334,7 @@
     font-size: 14px;
     padding: 5px;
     line-height: 1.5;
-    height:100%;
+    height: 100%;
   }
 
   /* optional class for removing the outline */
@@ -338,17 +343,17 @@
   }
 
   .text_left{
-    text-align:left;
+    text-align: left;
   }
 
   .width_95{
-    width:95%;
-    position:relative;
+    width: 95%;
+    position: relative;
   }
 
   .padding_set{
-    padding:0 25px;
-    padding-top:5px;
+    padding: 0 25px;
+    padding-top: 5px;
   }
 
   .font_style{
