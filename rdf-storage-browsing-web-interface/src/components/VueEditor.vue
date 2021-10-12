@@ -1,16 +1,30 @@
 <template>
   <Toast />
-  <table class="error_td" style="width:100%;border: 2px solid black;">
+  <!-- TODO: height setting -->
+  <div class="p-col text_left">
+    <h1>Editor</h1>
+  </div>
+  <table class="common_bgc" style="width:100%; border: 2px solid black; min-height:20vh;">
     <tr>
-      <td style="width:95%;">
+      <th class="text_left padding_set" v-if="htmlCode.length">
+        Namespaces:
+      </th>
+    </tr>  
+    <tr v-for="(n,j) in htmlCode" :key="j">
+      <!-- tds representing namespaces with prefixes -->
+      <td class="text_left width_95 padding_set font_style" :id="`td-${j}`"></td>
+    </tr>
+
+    <tr>
+      <td class="width_95">
         <prism-editor class="my-editor" v-model="code" :highlight="highlighter" line-numbers></prism-editor>
       </td>
       <td>
-          <tr v-for="i in newRowsCount" :key="i" :id="i-oldRowsCount+1" style="visibility: hidden">
-            <td v-tooltip.right="errorText">
-              <i style="color:red" class="pi pi-times-circle"></i>
-            </td>
-          </tr>
+        <tr v-for="i in newRowsCount" :key="i" :id="i-oldRowsCount+1" style="visibility: hidden">
+          <td v-tooltip.right="errorText" class="">
+            <i style="color:red" class="pi pi-times-circle"></i>
+          </td>
+        </tr>
       </td>
     </tr>
   </table>
@@ -31,111 +45,179 @@
   // !!!!!!!!!!!!!!!!!!!!! turtle was needed as dependenci
   import 'prismjs/components/prism-turtle'; 
   import 'prismjs/components/prism-sparql'; 
-  // Theme
+
+  // Theme for the editor
   import 'prismjs/themes/prism.css'; // import syntax highlighting styles
 
   // PrimeVue components
   import Button from 'primevue/button';
   import Tooltip from 'primevue/tooltip';
   import Toast from 'primevue/toast';
-
+  import Textarea from 'primevue/textarea';
+  
   // Sparql parser to validate query
   import Sparqljs from 'sparqljs'
 
-
+  import { config } from '../../config';
+  
   export default {
     name:'App',
     components: {
       PrismEditor,
       Button,
       Toast,
+      Textarea,
     },
+    emits: ['resultReturn','loadingResult'],
     directives: {
       'tooltip': Tooltip
     },
     data: () => ({ 
-      code: "PREFIX : <http://stardog.com/tutorial/> \n PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> \n SELECT ?album \n WHERE { ?album rdf:type :Album .}",
+      // sytax highlited html code representing prefixes in editor 
+      htmlCode:[],
+      code1: "SELECT ?a \n WHERE { ?a rdf:type :Album .}",
+      // query entered by user
+      code: "",//\n\n\n\n\n\n
+      // if the sytax is valid
       valide: false,
-      items: [],
+      // array containing all prefix and namespace tupples
+      prefixNsTuples: [],
+      // number of rows in the query
       newRowsCount: 0,
+      // number of rows in query before its change
       oldRowsCount: 1,
+      // text of the error found during sytnach check
       errorText: ' ',
-      parser: new Sparqljs.Parser()
+      // parser used for query validation
+      parser: new Sparqljs.Parser(),
+      // already added prefixes TODO: find better word
+      alreadyAddedPrefs:[],
+      // prfix declarations to prepend to the query
+      prefixTextDecls: [],
     }),
+    mounted() {
+      this.queryAllNamespaces();
+    },
     methods: {
+      // creating syntax highlighted version of the query
       highlighter(code) {
-        
         if(this.newRowsCount != 0) {
-          this.deleteDivs()
-          this.oldRowsCount = this.newRowsCount+1
+          this.deleteDivs();
+          this.oldRowsCount = this.newRowsCount+1; // old 6 new 5
         } 
 
-        code.split("\n").forEach(element => {
+        this.searchPrefixesToComplete(code)
+        this.setTdInnerHtml()
+        
+
+        code.split("\n").forEach(_ => {
           this.newRowsCount++
         })
 
         let highlightedCode = highlight(code, languages.sparql); // languages.<insert language> to return html with markup 
+
         return highlightedCode
       },
-      async queryRepositories() {
-        // CORS headers (filter) have to set in tomcat 9 web.xml file 
-        let answerToQuery = await fetch('http://127.0.0.1:8080/rdf4j-server/repositories', {
-          method: 'GET',
-          headers: {
-            // 'content-type': 'application/sparql-query',
-            'Accept':'application/json',
-            // 'Sec-Fetch-Dest': 'font'
-          },
-        })
-        .then(res => {
-         return res.text()})
-        .catch((error) => console.log(error))
+      // fetching all namespaces present in the repository
+      async queryAllNamespaces(){
+        const data = await fetch(config.server_url+'rdf4j-server/repositories/1/namespaces', {
+            method: 'GET',
+            headers: {
+              'Accept':'application/json',
+            },
+          })
+          .then(res =>  {
+            if(!res.ok){
+              this.$toast.add({severity:'error', summary: 'Error', detail:"Error happened during fetch of all namespaces!"});
+            } else { return res.json() }
+          })
+          .catch((error) => console.log(error))
+
+        // storing namespaces with corresponding prefixes as tupples
+        for (let index = 0; index < data.results.bindings.length; index++) {
+          this.prefixNsTuples.push({
+            'prefix': data.results.bindings[index].prefix.value,
+            'namespace': data.results.bindings[index].namespace.value
+          })
+        }
       },
+      // executing user given query
       async queryData(){
-        this.validateQuery(this.code, this.parser);
+
+        // concating prefixes with query body
+        let queryText = this.code;
+        this.prefixTextDecls.forEach(element => {
+          queryText = element.code + queryText;
+        });
+  
+        // syntax validation
+        this.validateQuery(queryText, this.parser);
 
         let answerToQuery;
         if(this.valide){
-        // CORS headers (filter) have to set in tomcat 9 web.xml file 
-        answerToQuery = await fetch('http://127.0.0.1:8080/rdf4j-server/repositories/1/namespaces', {
-          method: 'GET',
-          headers: {
-            'Accept':'application/json',
-          },
-        })
-        .then(res => {
-          return res.json()})
-        .catch((error) => console.log(error))
-        console.log(answerToQuery)
-        this.$toast.add({severity:'success', summary: 'Success Message', detail:'Query was successfully executed!', life: 3000});
-        this.valide = !this.valide
+          // emit that the fetching of data started, so show spinner
+          this.$emit('loadingResult', true);
+          // CORS headers (filter) have to set in tomcat 9 web.xml file 
+          answerToQuery = await fetch(config.server_url
+              +'rdf4j-server/repositories/1?query='+encodeURIComponent(queryText), {
+            method: 'GET',
+            headers: {
+              'Accept':'application/json',
+            },
+          })
+          .then(res =>
+              this.errorHandler(res)
+          )
+          .catch(error => 
+            this.$toast.add({severity:'error', summary: 'Error', detail:error, life: 3000}),
+          )
+          this.valide = !this.valide
+          console.log(answerToQuery);
+          // console.log("answer test ",answerToQuery.results.bindings[0].a);
+          // emit that the fetching of data ended, so hide spinner
+          this.$emit('loadingResult', false);
+          // emit answer if everything was OK
+          if(answerToQuery) {
+            let data = [answerToQuery, this.prefixNsTuples];
+            this.$emit('resultReturn', {data});
+          }
         }
 
       },
+      // validation of the query typed in by the user 
       validateQuery(code,parser){
         // let p = new Sparqljs.Parser()
         try {
+          // syntax validation by parser
           let parsed = parser.parse(code)
           this.valide = true
           this.errorText = ' '
         } catch (error) {
+          // parsing the number of the line on which the error is
+          // from the error.message 
           this.errorText = error.message  
           const nthIndxOfSpace = this.nthIndex(this.errorText,' ',4) + 1
           const indxOfColon = this.errorText.indexOf(':')
           const rowNumWithError = this.errorText.substring(nthIndxOfSpace,indxOfColon) 
 
-          console.log(rowNumWithError)
-          console.log(error.message)
-          document.getElementById(rowNumWithError).style.visibility = "visible"
-          this.$toast.add({severity:'error', summary: 'Error Message', detail:'Query contains error!', life: 3000});
+          // handling if in the error.message the line number is not specified
+          if(!isNaN(rowNumWithError)){
+            // line number is present
+            document.getElementById(rowNumWithError).style.visibility = "visible"
+            this.$toast.add({severity:'error', summary: 'Error Message', detail:'Query contains error!', life: 3000});
+          } else {
+            this.$toast.add({severity:'error', summary: 'Error Message', detail:'Query contains error: '+this.errorText});
+          }
         }
       },
+      // function to remove error icon placeholder divs from document 
       deleteDivs(){
         for (let index = 1; index <= this.newRowsCount-this.oldRowsCount+1; index++) {
-          document.getElementById(index).remove()
-          
+          document.getElementById(index).remove()  
         }
       },
+      // searching for the nth occurence of pattern in string
+      // returns index of the occurence
       nthIndex(str, pat, n){
           var L= str.length, i= -1;
           while(n-- && i++<L){
@@ -144,8 +226,83 @@
           }
           return i;
       },
+      // controling if server response conatinas error
+      async errorHandler(res){
+        if(!res.ok){
+          // something went wrong on server (status like: 4xx or 5xx, ...)
+          this.$toast.add({severity:'error', summary: 'Error', detail:"Error happened during execution!", life: 3000});
+        } else {
+          this.$toast.add({severity:'success', summary: 'Success Message', detail:'Query was successfully executed!', life: 3000});
+          return await res.json()
+        }
+      },
+      // automatic completion of prefixes
+      searchPrefixesToComplete(code){
+        let newlyFoundPrefs = [];
+        if(code.length > 0 && code.match(/([a-z][A-Z][0-9])*\w+/g)){
+          // search for possible prefixes in the user given query
+          const matched = code.match(/([a-z][A-Z])*\w*:([a-z][A-Z][0-9])*\w+/g); 
+          if(matched){
+            // controll if the matched words are correct prefixes
+            matched.forEach(element => {
+              const prefix = element.substring(0,element.indexOf(":"));
+              const ns = this.prefixNsTuples.filter(i => i.prefix == prefix)[0];
 
+              // prepeare proper html code to visualise prefix in the editor for the user
+              if(ns && !newlyFoundPrefs.includes(prefix)){
+                // this.alreadyAddedPrefs.push(prefix);
+                newlyFoundPrefs.push(prefix);
+                if(!this.alreadyAddedPrefs.includes(prefix)){
+                  // store text representation of prefix
+                  this.prefixTextDecls.push({
+                    "prefix":prefix,
+                    "code":"PREFIX " + prefix +": <" +ns.namespace+ ">"
+                  })
+                  // highlight the html code
+                  let highlightedCode = highlight("PREFIX " + prefix +": <" +ns.namespace+ ">", languages.sparql);
+                  this.htmlCode.push({
+                    "prefix":prefix,
+                    "code":highlightedCode});
+                  }
+              }
 
+            })
+
+            // controll which previous prefixes are not present in the query
+            this.alreadyAddedPrefs.forEach(e => {
+              if(!newlyFoundPrefs.includes(e)) {
+                this.htmlCode = this.htmlCode.filter(i => i.prefix !== e);
+                this.prefixTextDecls = this.prefixTextDecls.filter(i => i.prefix !== e);              
+              } 
+            });
+
+            // save all present prefixes
+            this.alreadyAddedPrefs = newlyFoundPrefs;
+          } else { 
+            // clear html code after user deleting all prefixes from editor
+            this.htmlCode = [];
+          }
+        } else {
+          // no prefix found in the query
+          this.alreadyAddedPrefs = [];
+          this.htmlCode = [];
+          this.prefixTextDecls = []; 
+        }
+      },
+
+      setTdInnerHtml(){
+        // wait until DOM is re-rendered
+        this.$nextTick(()=>{
+         
+          if(this.htmlCode.length>0){
+            // set the inner HTML of the td = show the namespace with prefix to the user
+            this.htmlCode.forEach((e,i) => {
+              document.getElementById('td-'+(i)).innerHTML = e.code;
+            });
+          }
+        }
+      )
+      }
     },
   };
 </script>
@@ -162,15 +319,46 @@
     font-size: 14px;
     line-height: 1.5;
     padding: 5px;
-    min-height:20vh;
+    position: absolute;
+    left: 0;
+    top: 0;
+    /* padding-top:35px; */
+    /* min-height:20vh; */
   }
 
-  .error_td{
+  .common_bgc{
     background: #f5f2f0;
+  }
+  
+  .error_td_size{
+    font-size: 14px;
+    padding: 5px;
+    line-height: 1.5;
+    height: 100%;
   }
 
   /* optional class for removing the outline */
   .prism-editor__textarea:focus {
     outline: none;
+  }
+
+  .text_left{
+    text-align: left;
+  }
+
+  .width_95{
+    width: 95%;
+    position: relative;
+  }
+
+  .padding_set{
+    padding: 0 25px;
+    padding-top: 5px;
+  }
+
+  .font_style{
+    font-family: Fira code, Fira Mono, Consolas, Menlo, Courier, monospace;
+    font-size: 14px;
+    line-height: 1.5;
   }
 </style>

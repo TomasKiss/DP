@@ -33,7 +33,7 @@ export default {
               to:{name: 'Home'}      
             },
             {
-              label: 'Namespaces',
+              label: 'Prefix declarations',
               icon: 'pi pi-list',
               to:{name: 'Namespaces'}      
             }
