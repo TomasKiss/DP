@@ -5,18 +5,18 @@ import NotFound from '../views/NotFound.vue'
 
 const routes = [
   {
-    path: '/',
+    path: '/r/:repo',
     name: 'Home',
     component: Home
   },
   {
-    path: '/namespaces',
+    path: '/:repo/namespaces',
     name: 'Namespaces',
     component: Namespaces
   },
   // catchall 404
   {
-    path: '/:catchAll(.*)',
+    path: '/:repo/:catchAll(.*)',
     name: 'NotFound',
     component: NotFound
   }

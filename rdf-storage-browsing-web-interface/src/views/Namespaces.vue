@@ -19,7 +19,11 @@
               </div>
         </div>  
         <div class="p-col-12" style="">
-            <DataTable  :value="tableData.data" responsiveLayout="scroll">
+            <DataTable  :value="tableData.data" responsiveLayout="scroll"
+            :paginator="true" :rows="10"
+            paginatorTemplate="CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
+            :rowsPerPageOptions="[10,20,50]"
+            currentPageReportTemplate="Showing {first} to {last} of {totalRecords}">
                 <Column  field="prefix" header="Prefix"></Column>
                 <Column  field="namespace" header="Namespace"></Column>
                 <Column  header="Options"> 

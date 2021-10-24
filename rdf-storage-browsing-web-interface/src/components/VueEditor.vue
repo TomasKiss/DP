@@ -120,7 +120,7 @@
       },
       // fetching all namespaces present in the repository
       async queryAllNamespaces(){
-        const data = await fetch(config.server_url+'rdf4j-server/repositories/1/namespaces', {
+        const data = await fetch(config.server_url+'rdf4j-server/repositories/'+this.$route.params.repo+'/namespaces', {
             method: 'GET',
             headers: {
               'Accept':'application/json',
@@ -159,7 +159,7 @@
           this.$emit('loadingResult', true);
           // CORS headers (filter) have to set in tomcat 9 web.xml file 
           answerToQuery = await fetch(config.server_url
-              +'rdf4j-server/repositories/1?query='+encodeURIComponent(queryText), {
+              +'rdf4j-server/repositories/'+this.$route.params.repo+'?query='+encodeURIComponent(queryText), {
             method: 'GET',
             headers: {
               'Accept':'application/json',

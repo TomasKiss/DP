@@ -4,7 +4,11 @@
 </div>
 <TabView :activeIndex="activePanel">
 	<TabPanel header="Subject" :disabled="!tableData.subject.length">
-      <DataTable  :value="tableData.subject" responsiveLayout="scroll">
+      <DataTable  :value="tableData.subject" responsiveLayout="scroll"
+      :paginator="true" :rows="10"
+      paginatorTemplate="CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
+      :rowsPerPageOptions="[10,20,50]"
+      currentPageReportTemplate="Showing {first} to {last} of {totalRecords}">
          <Column  header="Predicate"> 
             <template #body="slotProps">
                   <Button @click="fetchResData(slotProps.data.a_p_tol)" 
@@ -20,7 +24,11 @@
       </DataTable>
 	</TabPanel>
 	<TabPanel header="Predicate" :disabled="!tableData.predicate.length">
-      <DataTable  :value="tableData.predicate" responsiveLayout="scroll">
+      <DataTable  :value="tableData.predicate" responsiveLayout="scroll"
+      :paginator="true" :rows="10"
+      paginatorTemplate="CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
+      :rowsPerPageOptions="[10,20,50]"
+      currentPageReportTemplate="Showing {first} to {last} of {totalRecords}">
          <Column  header="Subject"> 
             <template #body="slotProps">
                   <Button @click="fetchResData(slotProps.data.b_s_tol)" 
@@ -36,7 +44,11 @@
       </DataTable>
    </TabPanel>
 	<TabPanel header="Object" :disabled="!tableData.object.length">
-      <DataTable  :value="tableData.object" responsiveLayout="scroll">
+      <DataTable  :value="tableData.object" responsiveLayout="scroll"
+      :paginator="true" :rows="10"
+      paginatorTemplate="CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
+      :rowsPerPageOptions="[10,20,50]"
+      currentPageReportTemplate="Showing {first} to {last} of {totalRecords}">
          <Column  header="Subject"> 
             <template #body="slotProps">
                   <Button @click="fetchResData(slotProps.data.c_s_tol)" 
@@ -112,7 +124,7 @@ export default {
          this.activePanel = 0;
 
          console.log(this.resource, queryText);
-         let data = await fetch(config.server_url+'rdf4j-server/repositories/1?query='+encodeURIComponent(queryText), {
+         let data = await fetch(config.server_url+'rdf4j-server/repositories/'+this.$route.params.repo+'?query='+encodeURIComponent(queryText), {
             method: 'GET',
             headers: {
               'Accept':'application/json',
