@@ -8,18 +8,27 @@
       :paginator="true" :rows="10"
       paginatorTemplate="CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
       :rowsPerPageOptions="[10,20,50]"
-      currentPageReportTemplate="Showing {first} to {last} of {totalRecords}">
-         <Column  header="Predicate"> 
+      currentPageReportTemplate="Showing {first} to {last} of {totalRecords}"
+      filterDisplay="row"
+      v-model:filters="filters"
+      >
+         <Column  header="Predicate" filterField="a_p_val"> 
             <template #body="slotProps">
                   <Button @click="fetchResData(slotProps.data.a_p_tol)" 
                      v-tooltip.bottom="slotProps.data.a_p_tol" :label="slotProps.data.a_p_val" class="p-button-link" />
             </template>
+            <template #filter="{filterModel,filterCallback}">
+              <InputText type="text" v-model="filterModel.value" @keydown.enter="filterCallback()" class="p-column-filter" :placeholder="`Search by ${filterModel.matchMode}`" v-tooltip.top.focus="'Hit enter key to filter'"/>
+            </template>
          </Column>
-         <Column  header="Object"> 
+         <Column  header="Object" filterField="a_o_val"> 
             <template #body="slotProps">
                   <Button @click="fetchResData(slotProps.data.a_o_tol)"
                      v-tooltip.bottom="slotProps.data.a_o_tol" :label="slotProps.data.a_o_val" class="p-button-link" />
             </template>
+            <template #filter="{filterModel,filterCallback}">
+              <InputText type="text" v-model="filterModel.value" @keydown.enter="filterCallback()" class="p-column-filter" :placeholder="`Search by ${filterModel.matchMode}`" v-tooltip.top.focus="'Hit enter key to filter'"/>
+            </template>   
          </Column>
       </DataTable>
 	</TabPanel>
@@ -28,17 +37,26 @@
       :paginator="true" :rows="10"
       paginatorTemplate="CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
       :rowsPerPageOptions="[10,20,50]"
-      currentPageReportTemplate="Showing {first} to {last} of {totalRecords}">
-         <Column  header="Subject"> 
+      currentPageReportTemplate="Showing {first} to {last} of {totalRecords}"
+      filterDisplay="row"
+      v-model:filters="filters"
+      >
+         <Column  header="Subject" filterField="b_s_val"> 
             <template #body="slotProps">
                   <Button @click="fetchResData(slotProps.data.b_s_tol)" 
                      v-tooltip.bottom="slotProps.data.b_s_tol" :label="slotProps.data.b_s_val" class="p-button-link" />
             </template>
+            <template #filter="{filterModel,filterCallback}">
+              <InputText type="text" v-model="filterModel.value" @keydown.enter="filterCallback()" class="p-column-filter" :placeholder="`Search by ${filterModel.matchMode}`" v-tooltip.top.focus="'Hit enter key to filter'"/>
+            </template>
          </Column>
-         <Column  header="Object"> 
+         <Column  header="Object" filterField="b_o_val"> 
             <template #body="slotProps">
                   <Button @click="fetchResData(slotProps.data.b_o_tol)"
                      v-tooltip.bottom="slotProps.data.b_o_tol" :label="slotProps.data.b_o_val" class="p-button-link" />
+            </template>
+            <template #filter="{filterModel,filterCallback}">
+              <InputText type="text" v-model="filterModel.value" @keydown.enter="filterCallback()" class="p-column-filter" :placeholder="`Search by ${filterModel.matchMode}`" v-tooltip.top.focus="'Hit enter key to filter'"/>
             </template>
          </Column>
       </DataTable>
@@ -48,17 +66,26 @@
       :paginator="true" :rows="10"
       paginatorTemplate="CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
       :rowsPerPageOptions="[10,20,50]"
-      currentPageReportTemplate="Showing {first} to {last} of {totalRecords}">
-         <Column  header="Subject"> 
+      currentPageReportTemplate="Showing {first} to {last} of {totalRecords}"
+      filterDisplay="row"
+      v-model:filters="filters"
+      >
+         <Column  header="Subject" filterField="c_s_val"> 
             <template #body="slotProps">
                   <Button @click="fetchResData(slotProps.data.c_s_tol)" 
                      v-tooltip.bottom="slotProps.data.c_s_tol" :label="slotProps.data.c_s_val" class="p-button-link" />
             </template>
+            <template #filter="{filterModel,filterCallback}">
+              <InputText type="text" v-model="filterModel.value" @keydown.enter="filterCallback()" class="p-column-filter" :placeholder="`Search by ${filterModel.matchMode}`" v-tooltip.top.focus="'Hit enter key to filter'"/>
+            </template>
          </Column>
-         <Column  header="Predicate"> 
+         <Column  header="Predicate" filterField="c_p_val"> 
             <template #body="slotProps">
                   <Button @click="fetchResData(slotProps.data.c_p_tol)"
                      v-tooltip.bottom="slotProps.data.c_p_tol" :label="slotProps.data.c_p_val" class="p-button-link" />
+            </template>
+            <template #filter="{filterModel,filterCallback}">
+              <InputText type="text" v-model="filterModel.value" @keydown.enter="filterCallback()" class="p-column-filter" :placeholder="`Search by ${filterModel.matchMode}`" v-tooltip.top.focus="'Hit enter key to filter'"/>
             </template>
          </Column>
       </DataTable>
@@ -76,6 +103,8 @@ import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
 import Button from 'primevue/button';
 import { config } from '../../config';
+import {FilterMatchMode,FilterOperator} from 'primevue/api';
+import InputText from 'primevue/inputtext';
 
 export default {
    name : 'ResourceExplorer',
@@ -86,6 +115,8 @@ export default {
       DataTable,
       Column,
       Button,
+      InputText,
+      FilterMatchMode,
    },
    data() {
       return {
@@ -101,7 +132,16 @@ export default {
          // resource which is currently examined   
          res : '',
          // id of active tab panel
-         activePanel : 0
+         activePanel : 0,
+         filters: {
+            global: { value: null, matchMode: FilterMatchMode.CONTAINS },
+            a_o_val: { value: null, matchMode: FilterMatchMode.CONTAINS },
+            a_p_val: { value: null, matchMode: FilterMatchMode.CONTAINS },
+            b_s_val: { value: null, matchMode: FilterMatchMode.CONTAINS },
+            b_o_val: { value: null, matchMode: FilterMatchMode.CONTAINS },
+            c_s_val: { value: null, matchMode: FilterMatchMode.CONTAINS },
+            c_p_val: { value: null, matchMode: FilterMatchMode.CONTAINS },
+         },
       }
    },
    async mounted() {
@@ -154,6 +194,9 @@ export default {
       },
       // function transforming the response into other structured data
       dataProcessing(data){
+         this.filters['global'] = { value: null, matchMode: FilterMatchMode.CONTAINS };   
+
+
          data.results.bindings.forEach((element) => {   
             // store data for first tab panel (predicate, object)
             if(element.a_p && element.a_o){
@@ -171,7 +214,8 @@ export default {
                   sub_word.a_p_val = sub_word.a_p_val.replace(item.namespace, item.prefix+':');      
                })  
                this.tableData.subject.push(sub_word);   
-               
+               this.filters['a_o_val'] = { value: null, matchMode: FilterMatchMode.CONTAINS };   
+               this.filters['a_p_val'] = { value: null, matchMode: FilterMatchMode.CONTAINS }; 
             }
 
             // store data for second tab panel (subject, object)
@@ -190,7 +234,8 @@ export default {
                   pred_word.b_s_val = pred_word.b_s_val.replace(item.namespace, item.prefix+':');      
                })  
                this.tableData.predicate.push(pred_word);   
-               
+               this.filters['b_s_val'] = { value: null, matchMode: FilterMatchMode.CONTAINS }; 
+               this.filters['b_o_val'] = { value: null, matchMode: FilterMatchMode.CONTAINS };   
             }
 
             // store data for third tab panel (subject, predicate)
@@ -209,7 +254,8 @@ export default {
                   obj_word.c_s_val = obj_word.c_s_val.replace(item.namespace, item.prefix+':');      
                })  
                this.tableData.object.push(obj_word);   
-               
+               this.filters['c_s_val'] = { value: null, matchMode: FilterMatchMode.CONTAINS }; 
+               this.filters['c_p_val'] = { value: null, matchMode: FilterMatchMode.CONTAINS }; 
             }
 
          })
@@ -222,7 +268,7 @@ export default {
          } else if(this.tableData.object.length > 0){
             this.activePanel = 2;
          }
-
+         console.log("resfilt",this.filters);
       }
    }
 
