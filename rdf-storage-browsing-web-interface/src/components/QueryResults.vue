@@ -23,37 +23,13 @@
         <template #loading>
           Loading data. Please wait.
         </template>
-        <Column v-for="(col,i) in columns" :field="col" :header="col" :key="i" filterField="af">
+        <Column v-for="(col,i) in columns" :field="col" :header="col" :key="i" :filterField="`${col}f`">
          <template #body="slotProps">
               <Button @click="exploreResource(slotProps.data[col].tol)" 
                 v-tooltip.bottom="slotProps.data[col].tol" class="p-button-link">{{slotProps.data[col].val}}</Button>
           </template>
           <template #filter="{filterModel,filterCallback}">
               <InputText type="text" v-model="filterModel.value" @keydown.enter="filterCallback()" class="p-column-filter" :placeholder="`Search by ${filterModel.matchMode}`" v-tooltip.top.focus="'Hit enter key to filter'"/>
-          </template>
-        </Column>
-    </DataTable>
-
-    <DataTable :value="newData" responsiveLayout="scroll" 
-      :paginator="true" :rows="10"
-      paginatorTemplate="CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
-      :rowsPerPageOptions="[10,20,50]"
-      currentPageReportTemplate="Showing {first} to {last} of {totalRecords}"
-      filterDisplay="row"
-      v-model:filters="newfilters"
-      >
-        <template #empty>
-          No data found.
-        </template>
-        <template #loading>
-          Loading data. Please wait.
-        </template>
-        <Column v-for="(col,i) in Newcolumns" :field="col" :header="col" :key="i">
-         <template #body="slotProps">
-            {{slotProps.data[col]}}
-          </template>
-          <template #filter="{filterModel}">
-              <InputText type="text" v-model="filterModel.value" class="p-column-filter" :placeholder="`Search by ${filterModel.matchMode}`" v-tooltip.top.focus="'Hit enter key to filter'"/>
           </template>
         </Column>
     </DataTable>
@@ -95,22 +71,7 @@ export default {
           filters: {
             global: { value: null, matchMode: FilterMatchMode.CONTAINS }
           },
-          newfilters: {
-            global: { value: null, matchMode: FilterMatchMode.CONTAINS },
-            a: { value: null, matchMode: FilterMatchMode.CONTAINS },
-            b: { value: null, matchMode: FilterMatchMode.CONTAINS },
-
-          },
-          Newcolumns: ['a','b'],
-          newData:[{
-            a: ":Please_Please_Me",
-            b: ":Please_Please_Me",
-          },
-          {
-            a: ":McCartney",
-            b: ":McCartney",
-          }
-          ]
+         
         }
     },
     mounted() {
