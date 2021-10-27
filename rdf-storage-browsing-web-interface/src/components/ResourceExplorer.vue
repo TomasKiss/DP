@@ -164,11 +164,22 @@ export default {
          this.activePanel = 0;
 
          console.log(this.resource, queryText);
-         let data = await fetch(config.server_url+'rdf4j-server/repositories/'+this.$route.params.repo+'?query='+encodeURIComponent(queryText), {
-            method: 'GET',
+         // let data = await fetch(config.server_url+'rdf4j-server/repositories/'+this.$route.params.repo+'?query='+encodeURIComponent(queryText), {
+         //    method: 'GET',
+         //    headers: {
+         //      'Accept':'application/json',
+         //    },
+         // })
+
+         let data = await fetch(config.fitlayout_server_url
+              +'api/r/'+this.$route.params.repo+'/repository/query', {
+            method: 'POST',
             headers: {
               'Accept':'application/json',
+              'Content-Type':'application/sparql-query'
             },
+            body: queryText,
+
          })
          .then(res =>  {
             return res.json() 
@@ -197,7 +208,7 @@ export default {
          this.filters['global'] = { value: null, matchMode: FilterMatchMode.CONTAINS };   
 
 
-         data.results.bindings.forEach((element) => {   
+         data.result.results.bindings.forEach((element) => {   
             // store data for first tab panel (predicate, object)
             if(element.a_p && element.a_o){
                let sub_word = {

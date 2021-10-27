@@ -99,7 +99,7 @@ export default {
           this.showUserQueryRes = false;
 
           // store column headers 
-          this.result.data[0].head.vars.forEach((item) => {
+          this.result.data[0].result.head.vars.forEach((item) => {
             this.columns.push(
               item
             );
@@ -107,7 +107,7 @@ export default {
           })
           console.log(this.filters)
           // loop processing response and transforming it to row data  
-          this.result.data[0].results.bindings.forEach((element) => {
+          this.result.data[0].result.results.bindings.forEach((element) => {
             let answers = {};
             // process one rowe data
             this.columns.forEach((item) => {

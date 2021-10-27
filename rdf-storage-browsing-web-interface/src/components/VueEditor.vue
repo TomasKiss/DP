@@ -96,7 +96,7 @@
       prefixTextDecls: [],
     }),
     mounted() {
-      this.queryAllNamespaces();
+      // this.queryAllNamespaces();
     },
     methods: {
       // creating syntax highlighted version of the query
@@ -158,12 +158,23 @@
           // emit that the fetching of data started, so show spinner
           this.$emit('loadingResult', true);
           // CORS headers (filter) have to set in tomcat 9 web.xml file 
-          answerToQuery = await fetch(config.server_url
-              +'rdf4j-server/repositories/'+this.$route.params.repo+'?query='+encodeURIComponent(queryText), {
-            method: 'GET',
+          // answerToQuery = await fetch(config.server_url
+          //     +'rdf4j-server/repositories/'+this.$route.params.repo+'?query='+encodeURIComponent(queryText), {
+          //   method: 'GET',
+          //   headers: {
+          //     'Accept':'application/json',
+          //   },
+          console.log(queryText);
+          answerToQuery = await fetch(config.fitlayout_server_url
+              +'api/r/'+this.$route.params.repo+'/repository/query', {
+            method: 'POST',
             headers: {
               'Accept':'application/json',
+              'Content-Type':'application/sparql-query'
             },
+            body: queryText,
+
+
           })
           .then(res =>
               this.errorHandler(res)
@@ -177,7 +188,7 @@
           // emit that the fetching of data ended, so hide spinner
           this.$emit('loadingResult', false);
           // emit answer if everything was OK and data was found
-          if(answerToQuery.results.bindings.length > 0) {
+          if(answerToQuery.result.results.bindings.length > 0) {
             let data = [answerToQuery, this.prefixNsTuples];
             this.$emit('resultReturn', {data});
           } else {
