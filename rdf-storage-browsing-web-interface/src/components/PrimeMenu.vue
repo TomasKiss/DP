@@ -36,7 +36,12 @@ export default {
               label: 'Prefix declarations',
               icon: 'pi pi-list',
               to:{name: 'Namespaces'}      
-            }
+            },
+            {
+              label: 'Insert data',
+              icon: 'pi pi-upload',
+              to:{name: 'InsertDataPage'}      
+            },
         ],
       }
     },

@@ -1,0 +1,127 @@
+<template>
+    <Toast />
+    <div class="p-grid p-flex-column main">
+        <div class="p-col-12">
+            <h1>Insert new data to repository</h1>
+        </div>
+        <div class="p-col-12 leftText">
+            <h5 class="leftText">Upload data format</h5>
+            <Dropdown v-model="selectedFormat" :options="formats" optionLabel="name" optionValue="code" placeholder="Select a Format" />
+        </div>
+        <div class="p-col-12">
+           <h3 class="leftText">Upload from URL</h3>
+            <span class="leftText" style="" >
+                <InputText id="url" type="text" v-model="url" class="p-inputtext p-component" placeholder="URL"/>
+                <!-- <label for="url" class="">URL</label> -->
+            </span>
+        </div>
+        <div class="p-col-12">
+           <h3 class="leftText">Upload from File</h3>     
+            <FileUpload 
+                name="demo[]"
+                v-model="file" 
+                url="" @select="onSelect" 
+                :multiple="false" accept="" :showUploadButton="false"
+                :auto="false"
+                :customUpload="true"
+                :fileLimit="1"
+            >
+                <template #empty>
+                    <p>Drag and drop files to here to upload.</p>
+                </template>
+            </FileUpload>
+        </div>
+        <div class="p-col-12" style="text-align:center;margin-top:10px;">
+            <Button @click="uploadData" icon="pi pi-upload" iconPos="left" label="Upload" class="p-button-sm" />
+        </div>
+    </div>
+
+</template>
+
+<script>
+import Toast from 'primevue/toast';
+import FileUpload from 'primevue/fileupload';
+import InputText from 'primevue/inputtext';
+import Button from 'primevue/button';
+import Dropdown from 'primevue/dropdown';
+
+
+import { config } from '../../config';
+
+export default {
+    name: 'InsertData',
+    components: {
+        Toast,
+        FileUpload,
+        InputText,
+        Button,
+        Dropdown
+    },
+    data() {
+        return {
+            url:"",
+            file: "",
+            selectedFormat: "",
+            formats: [
+                {name: 'RDF/XML', code: 'application/rdf+xml'},
+                {name: 'N-Triples', code: 'text/plain'},
+                {name: 'Turtle', code: 'application/x-turtle;charset=UTF-8'},
+                {name: 'N3', code: 'text/rdf+n3'},
+                {name: 'RDF/JSON', code: 'application/rdf+json'}
+            ],
+        }
+    },
+    methods: {
+        onSelect(event) {
+            console.log(event.files)
+            this.file = event.files
+        },
+        async uploadData() {
+            if(this.selectedFormat == ""){
+                // Error no format selected
+                this.$toast.add({severity: 'error', summary: 'Error', detail: 'No data format chosen!', life: 3000});
+            } else if(this.url == "" && this.file == ""){
+                // Error no source selected
+                this.$toast.add({severity: 'error', summary: 'Error', detail: 'No data source chosen!', life: 3000});
+            } else if(this.url != "" && this.file != "") {
+                // Error two source selected
+                this.$toast.add({severity: 'error', summary: 'Error', detail: 'Please select just one data source!', life: 3000});
+            } else if (this.url != ""){
+                // Data update from URL source
+                this.$toast.add({severity: 'info', summary: 'Success', detail: 'File Uploaded form URL', life: 3000});
+
+            } else {
+                // Data update from File
+                await fetch(config.server_url+'rdf4j-server/repositories/2/statements', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type':this.selectedFormat,
+                    },
+                    body: this.file[0],
+
+                })
+                .then(res => {
+                    if(res.ok) {
+                        this.$toast.add({severity: 'info', summary: 'Success', detail: 'Data Uploaded form File', life: 3000});
+                    }
+                    console.log(res)
+                })
+                .catch(error => 
+                    this.$toast.add({severity:'error', summary: 'Error', detail:error, life: 3000}),
+                )
+            }
+        }
+    }
+}
+</script>
+
+<style>
+.leftText {
+    text-align: left;
+}
+
+.p-float-label>input:focus~label, .p-float-label>input.p-state-filled~label, .p-float-label>.p-inputwrapper-focus~label, .p-float-label>.p-inputwrapper-filled~label { top: -.75em; font-size: 12px; }
+.p-float-label>textarea:focus~label, .p-float-label>textarea.p-state-filled~label, .p-float-label>.p-textareawrapper-focus~label, .p-float-label>.p-textareawrapper-filled~label { top: -.75em; font-size: 12px; }
+
+
+</style>
