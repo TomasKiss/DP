@@ -31,6 +31,11 @@
                 </template>
             </FileUpload>
         </div>
+        <div class="p-col-12">
+            <h3 class="leftText">Upload data as text</h3>
+
+            <Textarea v-model="textData" :autoResize="true" rows="5" cols="80" placeholder="Data in text format"/>
+        </div>    
         <div class="p-col-12" style="text-align:center;margin-top:10px;">
             <Button @click="uploadData" icon="pi pi-upload" iconPos="left" label="Upload" class="p-button-sm" />
         </div>
@@ -44,6 +49,7 @@ import FileUpload from 'primevue/fileupload';
 import InputText from 'primevue/inputtext';
 import Button from 'primevue/button';
 import Dropdown from 'primevue/dropdown';
+import Textarea from 'primevue/textarea';
 
 
 import { config } from '../../config';
@@ -55,7 +61,8 @@ export default {
         FileUpload,
         InputText,
         Button,
-        Dropdown
+        Dropdown,
+        Textarea,
     },
     data() {
         return {
@@ -69,6 +76,7 @@ export default {
                 {name: 'N3', code: 'text/rdf+n3'},
                 {name: 'RDF/JSON', code: 'application/rdf+json'}
             ],
+            textData: "",
         }
     },
     methods: {
@@ -80,17 +88,34 @@ export default {
             if(this.selectedFormat == ""){
                 // Error no format selected
                 this.$toast.add({severity: 'error', summary: 'Error', detail: 'No data format chosen!', life: 3000});
-            } else if(this.url == "" && this.file == ""){
+            } else if(this.url == "" && this.file == "" && this.textData == ""){
                 // Error no source selected
                 this.$toast.add({severity: 'error', summary: 'Error', detail: 'No data source chosen!', life: 3000});
-            } else if(this.url != "" && this.file != "") {
+            } else if(this.url != "" && this.file != "" && this.textData != "") {
                 // Error two source selected
                 this.$toast.add({severity: 'error', summary: 'Error', detail: 'Please select just one data source!', life: 3000});
-            } else if (this.url != ""){
+            } else if (this.url != "" && this.file == "" && this.textData == ""){
                 // Data update from URL source
                 this.$toast.add({severity: 'info', summary: 'Success', detail: 'File Uploaded form URL', life: 3000});
+                await fetch('https://raw.githubusercontent.com/stardog-union/stardog-tutorials/master/music/beatles.ttl', {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type':this.selectedFormat,
+                    },
 
-            } else {
+                })
+                .then(res => {
+                    if(res.ok) {
+                        this.$toast.add({severity: 'info', summary: 'Success', detail: 'Data Uploaded form File', life: 3000});
+                    }
+                    console.log(res)
+                })
+                .catch(error => 
+                    this.$toast.add({severity:'error', summary: 'Error', detail:error, life: 3000}),
+                )
+
+
+            } else if (this.url == "" && this.file != "" && this.textData == ""){
                 // Data update from File
                 await fetch(config.server_url+'rdf4j-server/repositories/2/statements', {
                     method: 'POST',
@@ -98,6 +123,25 @@ export default {
                         'Content-Type':this.selectedFormat,
                     },
                     body: this.file[0],
+
+                })
+                .then(res => {
+                    if(res.ok) {
+                        this.$toast.add({severity: 'info', summary: 'Success', detail: 'Data Uploaded form File', life: 3000});
+                    }
+                    console.log(res)
+                })
+                .catch(error => 
+                    this.$toast.add({severity:'error', summary: 'Error', detail:error, life: 3000}),
+                )
+            } else {
+                // Data update from Textarea
+                await fetch(config.server_url+'rdf4j-server/repositories/2/statements', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type':this.selectedFormat,
+                    },
+                    body: this.textData,
 
                 })
                 .then(res => {
@@ -123,5 +167,8 @@ export default {
 .p-float-label>input:focus~label, .p-float-label>input.p-state-filled~label, .p-float-label>.p-inputwrapper-focus~label, .p-float-label>.p-inputwrapper-filled~label { top: -.75em; font-size: 12px; }
 .p-float-label>textarea:focus~label, .p-float-label>textarea.p-state-filled~label, .p-float-label>.p-textareawrapper-focus~label, .p-float-label>.p-textareawrapper-filled~label { top: -.75em; font-size: 12px; }
 
+.p-fileupload-buttonbar{
+    background-color: rgb(216, 216, 216) !important;
+}
 
 </style>

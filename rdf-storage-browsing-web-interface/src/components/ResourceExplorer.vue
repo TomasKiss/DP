@@ -208,7 +208,7 @@ export default {
          this.filters['global'] = { value: null, matchMode: FilterMatchMode.CONTAINS };   
 
 
-         data.result.results.bindings.forEach((element) => {   
+         data.results.bindings.forEach((element) => {   
             // store data for first tab panel (predicate, object)
             if(element.a_p && element.a_o){
                let sub_word = {

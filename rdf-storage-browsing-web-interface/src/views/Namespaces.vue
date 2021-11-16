@@ -152,7 +152,10 @@ export default {
     },
     // removal of namespace after confirmation
     async onConfirmRemove(prefixToRemove) {
-      const res = await fetch(config.server_url+'rdf4j-server/repositories/1/namespaces/'+prefixToRemove,{
+      const res = 
+      // await fetch(config.server_url+'rdf4j-server/repositories/1/namespaces/'+prefixToRemove,
+      await fetch(config.fitlayout_server_url+'api/r/'+this.$route.params.repo+'/repository/namespaces/'+prefixToRemove,
+      {
         method: 'DELETE',
       })
       .then(
@@ -187,7 +190,10 @@ export default {
         // TODO: Control if namespace/prefix already exists ???
         // TODO: Control if namespace/prefix correct format ???
 
-        const res = await fetch(config.server_url+'rdf4j-server/repositories/1/namespaces/'+this.newNSprefix,{
+        const res = 
+        // await fetch(config.server_url+'rdf4j-server/repositories/1/namespaces/'+this.newNSprefix,
+        await fetch(config.fitlayout_server_url+'api/r/'+this.$route.params.repo+'/repository/namespaces/'+this.newNSprefix,
+        {
           method: 'PUT',
           headers:{
             'Content-Type': 'text/plain'
@@ -215,7 +221,10 @@ export default {
     async closeEditModal() {
       // TODO: Control if namespace is given???
       if(this.prefixEditNS !== ''){
-          const res = await fetch(config.server_url+'rdf4j-server/repositories/1/namespaces/'+this.prefixEditNS,{
+          const res =
+          //  await fetch(config.server_url+'rdf4j-server/repositories/1/namespaces/'+this.prefixEditNS,
+          await fetch(config.fitlayout_server_url+'api/r/'+this.$route.params.repo+'/repository/namespaces/'+this.prefixEditNS,
+          {
           method: 'PUT',
           headers:{
             'Content-Type': 'text/plain'
@@ -237,7 +246,8 @@ export default {
       this.displayEditModal = false;
     },
     async queryAllNamespaces(){
-      this.data = await fetch(config.server_url+'rdf4j-server/repositories/1/namespaces', {
+      this.data = await fetch(config.fitlayout_server_url
+              +'api/r/'+this.$route.params.repo+'/repository/namespaces', {
           method: 'GET',
           headers: {
             'Accept':'application/json',

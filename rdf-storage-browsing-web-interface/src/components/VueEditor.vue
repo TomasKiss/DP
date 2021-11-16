@@ -96,7 +96,7 @@
       prefixTextDecls: [],
     }),
     mounted() {
-      // this.queryAllNamespaces();
+      this.queryAllNamespaces();
     },
     methods: {
       // creating syntax highlighted version of the query
@@ -120,7 +120,8 @@
       },
       // fetching all namespaces present in the repository
       async queryAllNamespaces(){
-        const data = await fetch(config.server_url+'rdf4j-server/repositories/'+this.$route.params.repo+'/namespaces', {
+        const data = await fetch(config.fitlayout_server_url
+              +'api/r/'+this.$route.params.repo+'/repository/namespaces', {
             method: 'GET',
             headers: {
               'Accept':'application/json',
@@ -188,7 +189,7 @@
           // emit that the fetching of data ended, so hide spinner
           this.$emit('loadingResult', false);
           // emit answer if everything was OK and data was found
-          if(answerToQuery.result.results.bindings.length > 0) {
+          if(('boolean' in answerToQuery.results) || answerToQuery.results.bindings.length > 0) {
             let data = [answerToQuery, this.prefixNsTuples];
             this.$emit('resultReturn', {data});
           } else {
