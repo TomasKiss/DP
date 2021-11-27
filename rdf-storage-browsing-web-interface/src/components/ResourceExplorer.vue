@@ -1,4 +1,6 @@
 <template>
+  <Toast />
+
 <div>
    <h3>Resource: {{res}}</h3>
 </div>
@@ -105,6 +107,7 @@ import Button from 'primevue/button';
 import { config } from '../../config';
 import {FilterMatchMode,FilterOperator} from 'primevue/api';
 import InputText from 'primevue/inputtext';
+import Toast from 'primevue/toast';
 
 export default {
    name : 'ResourceExplorer',
@@ -117,6 +120,7 @@ export default {
       Button,
       InputText,
       FilterMatchMode,
+      Toast,
    },
    data() {
       return {
@@ -145,7 +149,6 @@ export default {
       }
    },
    async mounted() {
-      console.log(this.resource);
       this.res = this.resource;
       // fetching data to explore first resource
       await this.fetchResData(this.resource);
@@ -156,14 +159,7 @@ export default {
       async fetchResData(resource) {
          // create query 
          let queryText = this.createQuery(resource);   
-         // initialize needed variables
-         this.tableData.subject = [];
-         this.tableData.predicate = [];
-         this.tableData.object = [];
-         this.res = resource;
-         this.activePanel = 0;
 
-         console.log(this.resource, queryText);
          // let data = await fetch(config.server_url+'rdf4j-server/repositories/'+this.$route.params.repo+'?query='+encodeURIComponent(queryText), {
          //    method: 'GET',
          //    headers: {
@@ -175,20 +171,35 @@ export default {
               +'api/r/'+this.$route.params.repo+'/repository/query', {
             method: 'POST',
             headers: {
-              'Accept':'application/json',
+            //   'Accept':'application/json',
               'Content-Type':'application/sparql-query'
             },
             body: queryText,
 
          })
          .then(res =>  {
-            return res.json() 
+            if (!res.ok) {
+               console.log("No data found for: ", resource);
+               // show toast about no data found for the resource
+               this.$toast.add({severity:'error', summary: 'Error', detail:`No data found for resource:\n ${resource} !`, life: 3000});
+            } else {
+               return res.json(); 
+            }
          })
          .catch((error) => console.log(error))
 
-         console.log(data);
-         // convert response to easier accessible data
-         this.dataProcessing(data);
+         if(data){
+            // initialize needed variables
+            this.tableData.subject = [];
+            this.tableData.predicate = [];
+            this.tableData.object = [];
+            this.res = resource;
+            this.activePanel = 0;
+
+            // convert response to easier accessible data
+            this.dataProcessing(data);
+         }
+
       },
       // function creating text of the query
       createQuery(resource){
@@ -279,7 +290,7 @@ export default {
          } else if(this.tableData.object.length > 0){
             this.activePanel = 2;
          }
-         console.log("resfilt",this.filters);
+         // console.log("resfilt",this.filters);
       }
    }
 

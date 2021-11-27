@@ -94,6 +94,8 @@
       alreadyAddedPrefs:[],
       // prefix declarations to prepend to the query
       prefixTextDecls: [],
+      // type of the query (select, ask, construct)
+      queryType: "select",
     }),
     mounted() {
       this.queryAllNamespaces();
@@ -154,6 +156,16 @@
         // syntax validation
         this.validateQuery(queryText, this.parser);
 
+        // get the type of query
+        if(queryText.toLowerCase().includes("construct")){
+          this.queryType = "construct";
+        } else if(queryText.toLowerCase().includes("ask")){
+          this.queryType = "ask";
+        } else {
+          this.queryType = "select";
+        }
+
+
         let answerToQuery;
         if(this.valid){
           // emit that the fetching of data started, so show spinner
@@ -170,7 +182,7 @@
               +'api/r/'+this.$route.params.repo+'/repository/query', {
             method: 'POST',
             headers: {
-              'Accept':'application/json',
+              // 'Accept':'application/json',
               'Content-Type':'application/sparql-query'
             },
             body: queryText,
@@ -178,19 +190,23 @@
 
           })
           .then(res =>
-              this.errorHandler(res)
+              this.errorHandler(res),
           )
           .catch(error => 
-            this.$toast.add({severity:'error', summary: 'Error', detail:error, life: 3000}),
+            this.$toast.add({severity:'error', summary: 'Error', detail:error}),
           )
           this.valid = !this.valid
-          console.log(answerToQuery);
-          // console.log("answer test ",answerToQuery.results.bindings[0].a);
+          // console.log(answerToQuery);
+
           // emit that the fetching of data ended, so hide spinner
           this.$emit('loadingResult', false);
+
           // emit answer if everything was OK and data was found
-          if(('boolean' in answerToQuery.results) || answerToQuery.results.bindings.length > 0) {
-            let data = [answerToQuery, this.prefixNsTuples];
+          if((this.queryType == "ask" && 'boolean' in answerToQuery) || 
+            (this.queryType == "select" && answerToQuery.results.bindings.length > 0) ||
+            (this.queryType == "construct" &&  answerToQuery.length > 0)) 
+          {
+            let data = [answerToQuery, this.prefixNsTuples, this.queryType];
             this.$emit('resultReturn', {data});
           } else {
             // no data found for the query
@@ -201,7 +217,6 @@
       },
       // validation of the query typed in by the user 
       validateQuery(code,parser){
-        // let p = new Sparqljs.Parser()
         try {
           // syntax validation by parser
           let parsed = parser.parse(code)
@@ -247,8 +262,14 @@
           // something went wrong on server (status like: 4xx or 5xx, ...)
           this.$toast.add({severity:'error', summary: 'Error', detail:"Error happened during execution!", life: 3000});
         } else {
+
           this.$toast.add({severity:'success', summary: 'Success Message', detail:'Query was successfully executed!', life: 3000});
-          return await res.json()
+          if(this.queryType == "ask" || this.queryType == "select"){
+            return await res.json();
+          } else {
+            return await res.text();
+          }
+          
         }
       },
       // automatic completion of prefixes
@@ -317,7 +338,9 @@
           }
         }
       )
-      }
+      },
+
+
     },
   };
 </script>
