@@ -38,6 +38,11 @@ export default {
               to:{name: 'Namespaces'}      
             },
             {
+              label: 'Saved queries',
+              icon: 'pi pi-question-circle',
+              to:{name: 'SavedQueriesPage'}      
+            },
+            {
               label: 'Insert data',
               icon: 'pi pi-upload',
               to:{name: 'InsertDataPage'}      

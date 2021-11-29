@@ -28,8 +28,16 @@
       </td>
     </tr>
   </table>
-  <div style="text-align:center;margin-top:10px;">
-    <Button @click="queryData" label="Execute" class="p-button-sm" />
+  <div style="text-align:center;margin-top:10px;" class="p-grid ">
+    <div class="p-col-4 p-offset-4">
+      <Button @click="queryData" label="Execute" class="p-button-sm" />
+
+    </div>
+    <div class="p-col-4">
+      <Button label="Save" @click="saveQueryToCookie" class="p-button-sm p-button-secondary" style="margin-right: 10px"/>
+      <InputText id="name" v-model="queryName" type="text" class="p-inputtext-sm" placeholder="Save query as ..."/>
+    </div>
+
   </div>
 </template>
 
@@ -54,7 +62,8 @@
   import Tooltip from 'primevue/tooltip';
   import Toast from 'primevue/toast';
   import Textarea from 'primevue/textarea';
-  
+  import InputText from 'primevue/inputtext';
+
   // Sparql parser to validate query
   import Sparqljs from 'sparqljs'
 
@@ -67,6 +76,7 @@
       Button,
       Toast,
       Textarea,
+      InputText,
     },
     emits: ['resultReturn','loadingResult'],
     directives: {
@@ -75,9 +85,8 @@
     data: () => ({ 
       // syntax highlighted html code representing prefixes in editor 
       htmlCode:[],
-      code1: "SELECT ?a \n WHERE { ?a rdf:type :Album .}",
       // query entered by user
-      code: "",//\n\n\n\n\n\n
+      code: "",
       // if the syntax is valid
       valid: false,
       // array containing all prefix and namespace tuples
@@ -96,9 +105,23 @@
       prefixTextDecls: [],
       // type of the query (select, ask, construct)
       queryType: "select",
+      // name of the query to be saved
+      queryName: "",
     }),
     mounted() {
       this.queryAllNamespaces();
+
+      console.log(this.prefixNsTuples);
+      if(this.$route.params.do != "" && this.$route.params.query != "" && this.$route.params.name ){
+          this.code = this.$route.params.query;
+          this.queryName = this.$route.params.name;
+
+          // if(this.$route.params.do == "execute"){
+          //   this.queryData();
+          // }
+          this.$router.replace({params: { name: undefined, do: undefined, query: undefined}}); 
+      }
+
     },
     methods: {
       // creating syntax highlighted version of the query
@@ -108,17 +131,17 @@
           this.oldRowsCount = this.newRowsCount+1; // old 6 new 5
         } 
 
-        this.searchPrefixesToComplete(code)
-        this.setTdInnerHtml()
+        this.searchPrefixesToComplete(code);
+        this.setTdInnerHtml();
         
 
         code.split("\n").forEach(_ => {
-          this.newRowsCount++
+          this.newRowsCount++;
         })
 
         let highlightedCode = highlight(code, languages.sparql); // languages.<insert language> to return html with markup 
 
-        return highlightedCode
+        return highlightedCode;
       },
       // fetching all namespaces present in the repository
       async queryAllNamespaces(){
@@ -149,10 +172,11 @@
 
         // connect prefixes with query body
         let queryText = this.code;
+
         this.prefixTextDecls.forEach(element => {
           queryText = element.code + queryText;
         });
-  
+        console.log("queryText3",queryText);
         // syntax validation
         this.validateQuery(queryText, this.parser);
 
@@ -187,7 +211,6 @@
             },
             body: queryText,
 
-
           })
           .then(res =>
               this.errorHandler(res),
@@ -218,22 +241,23 @@
       // validation of the query typed in by the user 
       validateQuery(code,parser){
         try {
+          console.log(code);
           // syntax validation by parser
-          let parsed = parser.parse(code)
-          this.valid = true
-          this.errorText = ' '
+          let parsed = parser.parse(code);
+          this.valid = true;
+          this.errorText = ' ';
         } catch (error) {
           // parsing the number of the line on which the error is
           // from the error.message 
-          this.errorText = error.message  
-          const nthIndxOfSpace = this.nthIndex(this.errorText,' ',4) + 1
-          const indxOfColon = this.errorText.indexOf(':')
-          const rowNumWithError = this.errorText.substring(nthIndxOfSpace,indxOfColon) 
+          this.errorText = error.message;
+          const nthIndxOfSpace = this.nthIndex(this.errorText,' ',4) + 1;
+          const indxOfColon = this.errorText.indexOf(':');
+          const rowNumWithError = this.errorText.substring(nthIndxOfSpace,indxOfColon); 
 
           // handling if in the error.message the line number is not specified
           if(!isNaN(rowNumWithError)){
             // line number is present
-            document.getElementById(rowNumWithError).style.visibility = "visible"
+            document.getElementById(rowNumWithError).style.visibility = "visible";
             this.$toast.add({severity:'error', summary: 'Error Message', detail:'Query contains error!', life: 3000});
           } else {
             this.$toast.add({severity:'error', summary: 'Error Message', detail:'Query contains error: '+this.errorText});
@@ -243,7 +267,7 @@
       // function to remove error icon placeholder divs from document 
       deleteDivs(){
         for (let index = 1; index <= this.newRowsCount-this.oldRowsCount+1; index++) {
-          document.getElementById(index).remove()  
+          document.getElementById(index).remove();  
         }
       },
       // searching for the nth occurrence of pattern in string
@@ -340,6 +364,10 @@
       )
       },
 
+      saveQueryToCookie(){
+        this.$cookie.setCookie(this.queryName,this.code);  
+        this.$toast.add({severity:'success', summary: 'Success Message', detail:'Query was successfully saved!', life: 3000});
+      },
 
     },
   };

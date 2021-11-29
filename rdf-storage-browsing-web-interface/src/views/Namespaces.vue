@@ -34,7 +34,6 @@
                         <Button @click="confirmRemove(slotProps.data.prefix)" class="p-button-sm p-button-danger" v-tooltip.right="'Remove'">
                           <i class="pi pi-trash"></i>
                         </Button>
-
                   </template>
                 </Column>
             </DataTable>

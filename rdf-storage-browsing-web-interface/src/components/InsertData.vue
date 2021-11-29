@@ -70,11 +70,13 @@ export default {
             file: "",
             selectedFormat: "",
             formats: [
+                {name: 'JSON LD', code: 'application/ld+json'},
+                {name: 'Turtle', code: 'text/turtle'},
                 {name: 'RDF/XML', code: 'application/rdf+xml'},
-                {name: 'N-Triples', code: 'text/plain'},
-                {name: 'Turtle', code: 'application/x-turtle;charset=UTF-8'},
-                {name: 'N3', code: 'text/rdf+n3'},
-                {name: 'RDF/JSON', code: 'application/rdf+json'}
+                {name: 'N-Triples', code: 'application/n-triples'},
+                {name: 'N-Quads', code: 'application/n-quads'},
+                // {name: 'RDF/JSON', code: 'application/rdf+json'},
+
             ],
             textData: "",
         }
@@ -91,9 +93,6 @@ export default {
             } else if(this.url == "" && this.file == "" && this.textData == ""){
                 // Error no source selected
                 this.$toast.add({severity: 'error', summary: 'Error', detail: 'No data source chosen!', life: 3000});
-            } else if(this.url != "" && this.file != "" && this.textData != "") {
-                // Error two source selected
-                this.$toast.add({severity: 'error', summary: 'Error', detail: 'Please select just one data source!', life: 3000});
             } else if (this.url != "" && this.file == "" && this.textData == ""){
                 // Data update from URL source
                 this.$toast.add({severity: 'info', summary: 'Success', detail: 'File Uploaded form URL', life: 3000});
@@ -105,10 +104,7 @@ export default {
 
                 })
                 .then(res => {
-                    if(res.ok) {
-                        this.$toast.add({severity: 'info', summary: 'Success', detail: 'Data Uploaded form File', life: 3000});
-                    }
-                    console.log(res)
+                    this.controlResponse(res, "URL");
                 })
                 .catch(error => 
                     this.$toast.add({severity:'error', summary: 'Error', detail:error, life: 3000}),
@@ -117,7 +113,9 @@ export default {
 
             } else if (this.url == "" && this.file != "" && this.textData == ""){
                 // Data update from File
-                await fetch(config.server_url+'rdf4j-server/repositories/2/statements', {
+                // await fetch(config.server_url+'rdf4j-server/repositories/2/statements', 
+                await fetch(config.fitlayout_server_url+'api/r/'+this.$route.params.repo+'/repository/statements', 
+                {
                     method: 'POST',
                     headers: {
                         'Content-Type':this.selectedFormat,
@@ -126,17 +124,16 @@ export default {
 
                 })
                 .then(res => {
-                    if(res.ok) {
-                        this.$toast.add({severity: 'info', summary: 'Success', detail: 'Data Uploaded form File', life: 3000});
-                    }
-                    console.log(res)
+                    this.controlResponse(res, "File");
                 })
                 .catch(error => 
                     this.$toast.add({severity:'error', summary: 'Error', detail:error, life: 3000}),
                 )
-            } else {
+            } else if (this.url == "" && this.file == "" && this.textData != ""){
                 // Data update from Textarea
-                await fetch(config.server_url+'rdf4j-server/repositories/2/statements', {
+                // await fetch(config.server_url+'rdf4j-server/repositories/2/statements', 
+                await fetch(config.fitlayout_server_url+'api/r/'+this.$route.params.repo+'/repository/statements', 
+                {
                     method: 'POST',
                     headers: {
                         'Content-Type':this.selectedFormat,
@@ -145,16 +142,25 @@ export default {
 
                 })
                 .then(res => {
-                    if(res.ok) {
-                        this.$toast.add({severity: 'info', summary: 'Success', detail: 'Data Uploaded form File', life: 3000});
-                    }
-                    console.log(res)
+                    this.controlResponse(res, "TextArea");
                 })
                 .catch(error => 
                     this.$toast.add({severity:'error', summary: 'Error', detail:error, life: 3000}),
                 )
+            } else {
+                // Error more source selected
+                this.$toast.add({severity: 'error', summary: 'Error', detail: 'Please select just one data source!', life: 3000});
             }
-        }
+        },
+        controlResponse(res, source){
+            // Control the response status
+            if(res.ok) {
+                this.$toast.add({severity: 'info', summary: 'Success', detail: 'Data Uploaded form '+source, life: 3000});
+            } else {
+                this.$toast.add({severity:'error', summary: 'Error', detail:error, life: 3000});
+            } 
+            console.log(res);     
+        },
     }
 }
 </script>
