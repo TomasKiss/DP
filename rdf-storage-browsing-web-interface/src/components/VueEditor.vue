@@ -120,7 +120,6 @@
       if(localStorage.getItem('storedQueries')) {
         // get the content
         this.storedQueries = JSON.parse(localStorage.getItem('storedQueries'));
-        console.log(this.storedQueries);
       } else {
         // create the needed array 
         const parsed = JSON.stringify(this.storedQueries);
@@ -133,7 +132,6 @@
           this.$router.replace({params: { name: undefined, do: undefined}}); 
           // show the body of the chosen query in the editor
           this.code = this.storedQueries.filter(i => i.name == this.queryName)[0].body;  
-          console.log("query body: ",this.code);
       }
 
     },
@@ -318,20 +316,23 @@
             // control if the matched words are correct prefixes
             matched.forEach(element => {
               const prefix = element.substring(0,element.indexOf(":"));
-              const ns = this.prefixNsTuples.filter(i => i.prefix == prefix)[0];
+              const nameSpacePrefixTuple = this.prefixNsTuples.filter(i => i.prefix == prefix)[0];
 
               // prepare proper html code to visualize prefix in the editor for the user
-              if(ns && !newlyFoundPrefs.includes(prefix)){
+              if(nameSpacePrefixTuple && !newlyFoundPrefs.includes(prefix)){
                 // this.alreadyAddedPrefs.push(prefix);
                 newlyFoundPrefs.push(prefix);
                 if(!this.alreadyAddedPrefs.includes(prefix)){
-                  // store text representation of prefix
+                            console.log("matched: " + matched, "already prefs: "+this.alreadyAddedPrefs);
+
+                  // store text representation of prefix (declaration)
                   this.prefixTextDecls.push({
                     "prefix":prefix,
-                    "code":"PREFIX " + prefix +": <" +ns.namespace+ ">"
+                    "code":"PREFIX " + prefix +": <" +nameSpacePrefixTuple.namespace+ ">"
                   })
                   // highlight the html code
-                  let highlightedCode = highlight("PREFIX " + prefix +": <" +ns.namespace+ ">", languages.sparql);
+                  let highlightedCode = highlight("PREFIX " + prefix +": <" +nameSpacePrefixTuple.namespace
+                    + ">", languages.sparql);
                   this.htmlCode.push({
                     "prefix":prefix,
                     "code":highlightedCode});
@@ -352,10 +353,13 @@
             this.alreadyAddedPrefs = newlyFoundPrefs;
           } else { 
             // clear html code after user deleting all prefixes from editor
+            console.log("clear htmlCode", "already prefs: "+this.alreadyAddedPrefs);
             this.htmlCode = [];
+            this.alreadyAddedPrefs = [];  
           }
         } else {
           // no prefix found in the query
+          console.log("clear all arrays");
           this.alreadyAddedPrefs = [];
           this.htmlCode = [];
           this.prefixTextDecls = []; 
@@ -384,9 +388,7 @@
           const findIdx = this.storedQueries.findIndex(item => item.name == this.queryName);
           if(findIdx >= 0){
             // the query is already stored -> update body
-            this.storedQueries[findIdx].body = this.code;
-              
-            console.log("update", this.storedQueries);
+            this.storedQueries[findIdx].body = this.code;              
           } else {
             // new query to store
             const query = {name: this.queryName, body: this.code};
