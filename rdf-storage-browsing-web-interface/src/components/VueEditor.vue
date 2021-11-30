@@ -105,7 +105,7 @@
       alreadyAddedPrefs:[],
       // prefix declarations to prepend to the query
       prefixTextDecls: [],
-      // type of the query (select, ask, construct)
+      // type of the query (select, ask, construct, update-insert,delete,...)
       queryType: "select",
       // name of the query to be saved
       queryName: "",
@@ -197,8 +197,10 @@
           this.queryType = "construct";
         } else if(queryText.toLowerCase().includes("ask")){
           this.queryType = "ask";
-        } else {
+        } else if(queryText.toLowerCase().includes("select")){
           this.queryType = "select";
+        } else {
+          this.queryType = "update";
         }
 
 
@@ -214,11 +216,18 @@
           //     'Accept':'application/json',
           //   },
           console.log(queryText);
-          answerToQuery = await fetch(config.fitlayout_server_url
-              +'api/r/'+this.$route.params.repo+'/repository/query', {
+
+          let sendQueryToUrl = config.fitlayout_server_url+'api/r/'+this.$route.params.repo;
+          // change the URL end based on the type of query
+          if(this.queryType == "update"){
+            sendQueryToUrl = sendQueryToUrl + '/repository/updateQuery';
+          } else {
+            sendQueryToUrl = sendQueryToUrl + '/repository/query';
+          }
+
+          answerToQuery = await fetch(sendQueryToUrl, {
             method: 'POST',
             headers: {
-              // 'Accept':'application/json',
               'Content-Type':'application/sparql-query'
             },
             body: queryText,
@@ -230,7 +239,7 @@
           .catch(error => 
             this.$toast.add({severity:'error', summary: 'Error', detail:error}),
           )
-          this.valid = !this.valid
+          this.valid = !this.valid;
 
           // emit that the fetching of data ended, so hide spinner
           this.$emit('loadingResult', false);
@@ -238,12 +247,15 @@
           // emit answer if everything was OK and data was found
           if((this.queryType == "ask" && 'boolean' in answerToQuery) || 
             (this.queryType == "select" && answerToQuery.results.bindings.length > 0) ||
-            (this.queryType == "construct" &&  answerToQuery.length > 0)) 
+            (this.queryType == "construct" &&  answerToQuery.length > 0) ||
+            (this.queryType == "update" && 'status' in answerToQuery)) 
           {
             let data = [answerToQuery, this.prefixNsTuples, this.queryType];
             this.$emit('resultReturn', {data});
           } else {
             // no data found for the query
+            let data = ['', '', 'clear'];
+            this.$emit('resultReturn', {data});
             this.$toast.add({severity:'warn', summary: 'Warn Message', detail:'Query was successful but no data found!', life: 5000});
           }
         }
@@ -298,7 +310,7 @@
         } else {
 
           this.$toast.add({severity:'success', summary: 'Success Message', detail:'Query was successfully executed!', life: 3000});
-          if(this.queryType == "ask" || this.queryType == "select"){
+          if(this.queryType != "construct"){
             return await res.json();
           } else {
             return await res.text();
@@ -323,8 +335,6 @@
                 // this.alreadyAddedPrefs.push(prefix);
                 newlyFoundPrefs.push(prefix);
                 if(!this.alreadyAddedPrefs.includes(prefix)){
-                            console.log("matched: " + matched, "already prefs: "+this.alreadyAddedPrefs);
-
                   // store text representation of prefix (declaration)
                   this.prefixTextDecls.push({
                     "prefix":prefix,
@@ -353,13 +363,11 @@
             this.alreadyAddedPrefs = newlyFoundPrefs;
           } else { 
             // clear html code after user deleting all prefixes from editor
-            console.log("clear htmlCode", "already prefs: "+this.alreadyAddedPrefs);
             this.htmlCode = [];
             this.alreadyAddedPrefs = [];  
           }
         } else {
           // no prefix found in the query
-          console.log("clear all arrays");
           this.alreadyAddedPrefs = [];
           this.htmlCode = [];
           this.prefixTextDecls = []; 

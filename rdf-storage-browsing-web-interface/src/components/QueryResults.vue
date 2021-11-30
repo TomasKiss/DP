@@ -3,8 +3,8 @@
   <ResourceExplorer :resource="resource" :prefixes="result.data[1]"></ResourceExplorer>
 </div>
 
-<div v-else>
-    <div v-if="result.data[2] != 'ask'">
+<div v-else-if="this.result.data[2] != 'clear'">
+    <div v-if="result.data[2] != 'ask' && result.data[2] != 'update'">
         <DataTable :value="computedResult" responsiveLayout="scroll" 
           :paginator="true" :rows="10"
           paginatorTemplate="CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
@@ -35,13 +35,17 @@
             </Column>
         </DataTable>
     </div>
-    <div v-else>
+    <div v-else-if="result.data[2] == 'ask'">
         <!--Boolean result -->
 
         <h3>The result of query is: {{askRes ? "Yes" : "No"}}</h3>
         <i v-if="askRes" class="pi pi-check" style="fontSize: 2rem; color:green; font-weight:bold"></i>
         <i v-else class="pi pi-times" style="fontSize: 2rem; color:red; font-weight:bold"></i>
-
+    </div>
+    <div v-else-if="result.data[2] == 'update'">
+        <h3>The update query was successful
+          <i class="pi pi-check" style="fontSize: 2rem; color:green; font-weight:bold"></i>
+        </h3>
     </div>
 </div>
 
@@ -113,14 +117,17 @@ export default {
           this.showUserQueryRes = false;
           this.askRes = undefined; 
           
-          if(this.result.data[2] == "ask"){
+          if(this.result.data[2] == "clear"){
+            // the result was empty
+
+          } else if(this.result.data[2] == "ask"){
             // ASK query 
             // this.askQueryRes = true;
             this.askRes = this.result.data[0].boolean;
           } else if(this.result.data[2] == "select"){
             // SELECT query   
             this.processSelectResult(this.result.data[0]);
-          } else {
+          } else if(this.result.data[2] == "construct"){
             // CONSTRUCT query
             this.processConstructResult(this.result.data[0]);
           } 
