@@ -1,7 +1,7 @@
 <template>
 <Toast/>
 
-<DataTable :value="allQueries.data" responsiveLayout="scroll" 
+<DataTable :value="allQueriesName.data" responsiveLayout="scroll" 
     :paginator="true" :rows="10"
     paginatorTemplate="CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
     :rowsPerPageOptions="[10,20,50]"
@@ -26,9 +26,6 @@
         <template #body="slotProps">
             <Button @click="showQuery(slotProps.data.name)" class="p-button-sm margin-right"
             v-tooltip.bottom="'Show query'">Show</Button>
-<!-- 
-            <Button @click="executeQuery(slotProps.data.name)" class="p-button-sm margin-right"
-            v-tooltip.bottom="'Execute query'">Execute</Button> -->
 
             <Button @click="editQuery(slotProps.data.name)" class="p-button-sm margin-right p-button-warning" v-tooltip.bottom="'Edit query'">
                 <i class="pi pi-pencil"></i>
@@ -80,71 +77,74 @@ export default {
     },
     data() {
         return {
-            allQueries:  {"data":[]},
+            allQueriesName:  {"data":[]},
+            storedQueries: [],
         }
     },
     mounted() {
-        this.getAllQueries();
+        this.getAllQueriesName();
     },
     methods: {
-        getAllQueries() {
-            // Get all queries saved as cookies
-            // this.allQueries.data = this.$cookie.keys();
-            // this.allQueries.data.forEach(item => {
-            //     console.log(item);
-            // });
-            
-            this.$cookie.keys().forEach(item => {
-                console.log(item);
-                this.allQueries.data.push({
-                    'name': item
+        // Get all queries saved in the local storage
+        getAllQueriesName() {
+            if(localStorage.getItem('storedQueries')){
+                this.storedQueries = JSON.parse(localStorage.getItem('storedQueries'));
+
+                this.storedQueries.forEach(item => {
+                    this.allQueriesName.data.push({
+                        'name': item.name
+                    });
+                
                 });
-            });
-            
-        },
-        editQuery(cookieName){
-            // Edit the cookie of the chosen query
-            console.log(this.$cookie.getCookie(cookieName));            
-            this.$router.push({ name: 'Home', params: { name: cookieName, repo: this.$route.params.repo, 
-                do: 'show', query: this.$cookie.getCookie(cookieName)} 
-            });
 
+            }
         },
-        deleteQuery(cookieName){
-            // Delete the cookie of the chosen query
-            this.$cookie.removeCookie(cookieName);
-            this.allQueries.data = [];
-            this.getAllQueries();
-
-        },
-        executeQuery(cookieName) {
-            // Execute the chosen query
-
-            this.$router.push({ name: 'Home', params: { name: cookieName, repo: this.$route.params.repo, 
-                do: 'execute', query: this.$cookie.getCookie(cookieName)} 
-            });
-        },
-        showQuery(cookieName) {
-            // Show the chosen query in editor 
-            console.log(this.$cookie.getCookie(cookieName));            
-            this.$router.push({ name: 'Home', params: { name: cookieName, repo: this.$route.params.repo, 
-                do: 'show', query: this.$cookie.getCookie(cookieName)} 
+        // Edit the chosen query
+        editQuery(queryName){
+            this.$router.push({ name: 'Home', params: { name: queryName, repo: this.$route.params.repo, 
+                do: 'show'} 
             });
 
         },
         // open toast to confirm removal of namespace
-        confirmRemove(cookieName){
-            this.$toast.add({severity: 'warn', name: cookieName, group: 'bc'});
+        confirmRemove(queryName){
+            this.$toast.add({severity: 'warn', name: queryName, group: 'bc'});
         },
         // removal of query was rejected, close toast
         onRejectRemove() {
             this.$toast.removeGroup('bc');
         },
         // removal of query after confirmation
-        onConfirmRemove(cookieName) {
-            this.deleteQuery(cookieName);
+        onConfirmRemove(queryName) {
+            this.deleteQuery(queryName);
             this.$toast.removeGroup('bc');
         },
+        // Delete the chosen query from local storage
+        deleteQuery(queryName){
+            this.storedQueries = this.storedQueries.filter(item => item.name != queryName);
+            
+            const parsed = JSON.stringify(this.storedQueries);
+            localStorage.setItem('storedQueries', parsed);
+            
+            this.allQueriesName.data = [];
+            this.getAllQueriesName();
+
+        },
+        // Show the chosen query in editor 
+        showQuery(queryName) {
+            this.$router.push({ name: 'Home', params: { name: queryName, repo: this.$route.params.repo, 
+                do: 'show'} 
+            });
+
+        },
+        // executeQuery(queryName) {
+        //     // Execute the chosen query
+
+        //     this.$router.push({ name: 'Home', params: { name: queryName, repo: this.$route.params.repo, 
+        //         do: 'execute', query: this.$cookie.getCookie(queryName)} 
+        //     });
+        // },
+        
 
     },    
 }

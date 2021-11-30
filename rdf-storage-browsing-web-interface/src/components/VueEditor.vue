@@ -30,11 +30,13 @@
   </table>
   <div style="text-align:center;margin-top:10px;" class="p-grid ">
     <div class="p-col-4 p-offset-4">
-      <Button @click="queryData" label="Execute" class="p-button-sm" />
+      <Button @click="queryData" label="Execute" class="p-button-sm" 
+      v-tooltip.bottom="'Execute the query'" />
 
     </div>
     <div class="p-col-4">
-      <Button label="Save" @click="saveQueryToCookie" class="p-button-sm p-button-secondary" style="margin-right: 10px"/>
+      <Button label="Save" @click="saveQueryToLocalStorage" class="p-button-sm p-button-secondary" style="margin-right: 10px"
+        v-tooltip.bottom="'Save new or edited query'"/>
       <InputText id="name" v-model="queryName" type="text" class="p-inputtext-sm" placeholder="Save query as ..."/>
     </div>
 
@@ -107,19 +109,31 @@
       queryType: "select",
       // name of the query to be saved
       queryName: "",
+      // local storage array for storing queries
+      storedQueries: [],
     }),
     mounted() {
+      // initial query off all namespaces from the repository
       this.queryAllNamespaces();
 
-      console.log(this.prefixNsTuples);
-      if(this.$route.params.do != "" && this.$route.params.query != "" && this.$route.params.name ){
-          this.code = this.$route.params.query;
-          this.queryName = this.$route.params.name;
+      // checking if array for queries exists in the local storage
+      if(localStorage.getItem('storedQueries')) {
+        // get the content
+        this.storedQueries = JSON.parse(localStorage.getItem('storedQueries'));
+        console.log(this.storedQueries);
+      } else {
+        // create the needed array 
+        const parsed = JSON.stringify(this.storedQueries);
+        localStorage.setItem('storedQueries', parsed);
+      }
 
-          // if(this.$route.params.do == "execute"){
-          //   this.queryData();
-          // }
-          this.$router.replace({params: { name: undefined, do: undefined, query: undefined}}); 
+      // Redirect from "SavedQueriesPage"
+      if(this.$route.params.do != "" && this.$route.params.name ){
+          this.queryName = this.$route.params.name;
+          this.$router.replace({params: { name: undefined, do: undefined}}); 
+          // show the body of the chosen query in the editor
+          this.code = this.storedQueries.filter(i => i.name == this.queryName)[0].body;  
+          console.log("query body: ",this.code);
       }
 
     },
@@ -176,7 +190,7 @@
         this.prefixTextDecls.forEach(element => {
           queryText = element.code + queryText;
         });
-        console.log("queryText3",queryText);
+
         // syntax validation
         this.validateQuery(queryText, this.parser);
 
@@ -219,7 +233,6 @@
             this.$toast.add({severity:'error', summary: 'Error', detail:error}),
           )
           this.valid = !this.valid
-          // console.log(answerToQuery);
 
           // emit that the fetching of data ended, so hide spinner
           this.$emit('loadingResult', false);
@@ -241,7 +254,6 @@
       // validation of the query typed in by the user 
       validateQuery(code,parser){
         try {
-          console.log(code);
           // syntax validation by parser
           let parsed = parser.parse(code);
           this.valid = true;
@@ -364,9 +376,40 @@
       )
       },
 
-      saveQueryToCookie(){
-        this.$cookie.setCookie(this.queryName,this.code);  
-        this.$toast.add({severity:'success', summary: 'Success Message', detail:'Query was successfully saved!', life: 3000});
+      saveQueryToLocalStorage(){
+        // save user specified query to local storage
+
+        if(this.queryName.length > 0 && this.code.length > 0){
+          //TODO: have to control if the name is already in use ?   
+          const findIdx = this.storedQueries.findIndex(item => item.name == this.queryName);
+          if(findIdx >= 0){
+            // the query is already stored -> update body
+            this.storedQueries[findIdx].body = this.code;
+              
+            console.log("update", this.storedQueries);
+          } else {
+            // new query to store
+            const query = {name: this.queryName, body: this.code};
+            this.storedQueries.push(query);
+          } 
+
+          const parsed = JSON.stringify(this.storedQueries);
+          localStorage.setItem('storedQueries', parsed);
+
+
+          this.$toast.add({severity:'success', summary: 'Success Message', detail:`Query "${this.queryName}" was successfully saved!`, life: 3000});
+        } else {
+          if(this.queryName.length == 0){
+            // no name for the query was given
+            this.$toast.add({severity:'error', summary: 'Error Message', detail:'Pleas specify name for the query!', life: 5000});
+          }
+
+          if(this.code.length == 0){
+            // no name for the query was given
+            this.$toast.add({severity:'error', summary: 'Error Message', detail:'Pleas specify the query!', life: 5000});
+          }
+
+        }
       },
 
     },

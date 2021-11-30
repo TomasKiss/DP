@@ -7,7 +7,7 @@ import SavedQueriesPage from "../views/SavedQueriesPage.vue";
 
 const routes = [
   {
-    path: "/r/:repo/:name?/:do?/:query?",
+    path: "/r/:repo/:name?/:do?",
     name: "Home",
     component: Home,
   },
