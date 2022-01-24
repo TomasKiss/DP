@@ -24,8 +24,8 @@
 
     <Column  header="Options" bodyStyle="text-align: center">
         <template #body="slotProps">
-            <Button @click="showQuery(slotProps.data.name)" class="p-button-sm margin-right"
-            v-tooltip.bottom="'Show query'">Show</Button>
+            <!-- <Button @click="showQuery(slotProps.data.name)" class="p-button-sm margin-right"
+            v-tooltip.bottom="'Show query'">Show</Button> -->
 
             <Button @click="editQuery(slotProps.data.name)" class="p-button-sm margin-right p-button-warning" v-tooltip.bottom="'Edit query'">
                 <i class="pi pi-pencil"></i>

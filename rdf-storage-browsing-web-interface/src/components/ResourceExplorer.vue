@@ -23,6 +23,7 @@
               <InputText type="text" v-model="filterModel.value" @keydown.enter="filterCallback()" class="p-column-filter" :placeholder="`Search by ${filterModel.matchMode}`" v-tooltip.top.focus="'Hit enter key to filter'"/>
             </template>
          </Column>
+
          <Column  header="Object" filterField="a_o_val"> 
             <template #body="slotProps">
                   <Button @click="fetchResData(slotProps.data.a_o_tol)"
@@ -32,6 +33,7 @@
               <InputText type="text" v-model="filterModel.value" @keydown.enter="filterCallback()" class="p-column-filter" :placeholder="`Search by ${filterModel.matchMode}`" v-tooltip.top.focus="'Hit enter key to filter'"/>
             </template>   
          </Column>
+
       </DataTable>
 	</TabPanel>
 	<TabPanel header="Predicate" :disabled="!tableData.predicate.length">
@@ -52,6 +54,7 @@
               <InputText type="text" v-model="filterModel.value" @keydown.enter="filterCallback()" class="p-column-filter" :placeholder="`Search by ${filterModel.matchMode}`" v-tooltip.top.focus="'Hit enter key to filter'"/>
             </template>
          </Column>
+
          <Column  header="Object" filterField="b_o_val"> 
             <template #body="slotProps">
                   <Button @click="fetchResData(slotProps.data.b_o_tol)"
@@ -61,6 +64,7 @@
               <InputText type="text" v-model="filterModel.value" @keydown.enter="filterCallback()" class="p-column-filter" :placeholder="`Search by ${filterModel.matchMode}`" v-tooltip.top.focus="'Hit enter key to filter'"/>
             </template>
          </Column>
+
       </DataTable>
    </TabPanel>
 	<TabPanel header="Object" :disabled="!tableData.object.length">
@@ -81,6 +85,7 @@
               <InputText type="text" v-model="filterModel.value" @keydown.enter="filterCallback()" class="p-column-filter" :placeholder="`Search by ${filterModel.matchMode}`" v-tooltip.top.focus="'Hit enter key to filter'"/>
             </template>
          </Column>
+
          <Column  header="Predicate" filterField="c_p_val"> 
             <template #body="slotProps">
                   <Button @click="fetchResData(slotProps.data.c_p_tol)"
@@ -90,6 +95,7 @@
               <InputText type="text" v-model="filterModel.value" @keydown.enter="filterCallback()" class="p-column-filter" :placeholder="`Search by ${filterModel.matchMode}`" v-tooltip.top.focus="'Hit enter key to filter'"/>
             </template>
          </Column>
+
       </DataTable>
    </TabPanel>
 </TabView>
@@ -131,7 +137,7 @@ export default {
             'predicate':[],
             'object':[]
          },
-         //  tab panel headers 
+         // tab panel headers 
          headers : ["Subject", "Predicate", "Object"],
          // resource which is currently examined   
          res : '',
@@ -201,6 +207,7 @@ export default {
          }
 
       },
+      
       // function creating text of the query
       createQuery(resource){
          // if the chosen resource is a literal with datatype
@@ -214,6 +221,7 @@ export default {
             +"{?c_s?c_p<"+ resource +">.}}";
          }
       },
+
       // function transforming the response into other structured data
       dataProcessing(data){
          this.filters['global'] = { value: null, matchMode: FilterMatchMode.CONTAINS };   

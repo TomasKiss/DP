@@ -82,10 +82,13 @@ export default {
         }
     },
     methods: {
+        // if file upload is selected by user
         onSelect(event) {
             console.log(event.files)
             this.file = event.files
         },
+
+        // control if the all needed information is given by user and perform the upload
         async uploadData() {
             if(this.selectedFormat == ""){
                 // Error no format selected
@@ -96,10 +99,11 @@ export default {
             } else if (this.url != "" && this.file == "" && this.textData == ""){
                 // Data update from URL source
                 this.$toast.add({severity: 'info', summary: 'Success', detail: 'File Uploaded form URL', life: 3000});
-                await fetch('https://raw.githubusercontent.com/stardog-union/stardog-tutorials/master/music/beatles.ttl', {
+                // https://raw.githubusercontent.com/stardog-union/stardog-tutorials/master/music/beatles.ttl
+                await fetch(this.url, {
                     method: 'GET',
                     headers: {
-                        'Content-Type':this.selectedFormat,
+                        // 'Content-Type':this.selectedFormat,
                     },
 
                 })
@@ -152,6 +156,7 @@ export default {
                 this.$toast.add({severity: 'error', summary: 'Error', detail: 'Please select just one data source!', life: 3000});
             }
         },
+
         controlResponse(res, source){
             // Control the response status
             if(res.ok) {
@@ -170,8 +175,13 @@ export default {
     text-align: left;
 }
 
-.p-float-label>input:focus~label, .p-float-label>input.p-state-filled~label, .p-float-label>.p-inputwrapper-focus~label, .p-float-label>.p-inputwrapper-filled~label { top: -.75em; font-size: 12px; }
-.p-float-label>textarea:focus~label, .p-float-label>textarea.p-state-filled~label, .p-float-label>.p-textareawrapper-focus~label, .p-float-label>.p-textareawrapper-filled~label { top: -.75em; font-size: 12px; }
+.p-float-label>input:focus~label, .p-float-label>input.p-state-filled~label, 
+.p-float-label>.p-inputwrapper-focus~label, .p-float-label>.p-inputwrapper-filled~label 
+{ top: -.75em; font-size: 12px; }
+
+.p-float-label>textarea:focus~label, .p-float-label>textarea.p-state-filled~label, 
+.p-float-label>.p-textareawrapper-focus~label, .p-float-label>.p-textareawrapper-filled~label 
+{ top: -.75em; font-size: 12px; }
 
 .p-fileupload-buttonbar{
     background-color: rgb(216, 216, 216) !important;

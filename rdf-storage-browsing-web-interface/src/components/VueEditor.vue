@@ -104,7 +104,7 @@
       // already added prefixes TODO: find better word
       alreadyAddedPrefs:[],
       // prefix declarations to prepend to the query
-      prefixTextDecls: [],
+      prefixTextDeclarations: [],
       // type of the query (select, ask, construct, update-insert,delete,...)
       queryType: "select",
       // name of the query to be saved
@@ -138,23 +138,31 @@
     methods: {
       // creating syntax highlighted version of the query
       highlighter(code) {
+        // user written query in editor changed
         if(this.newRowsCount != 0) {
+          // delete not needed rows used for showing the error 
           this.deleteDivs();
+          // set the new row counts
           this.oldRowsCount = this.newRowsCount+1; // old 6 new 5
         } 
 
+        // creation of prefix declarations 
         this.searchPrefixesToComplete(code);
-        this.setTdInnerHtml();
-        
 
+        // visualize prefix declarations in the editor by setting the HTML content
+        this.setPrefixDeclarationsTdInnerHtml();
+        
+        // count the user written text rows
         code.split("\n").forEach(_ => {
           this.newRowsCount++;
         })
 
+        // 
         let highlightedCode = highlight(code, languages.sparql); // languages.<insert language> to return html with markup 
 
         return highlightedCode;
       },
+
       // fetching all namespaces present in the repository
       async queryAllNamespaces(){
         const data = await fetch(config.fitlayout_server_url
@@ -179,13 +187,14 @@
           })
         }
       },
+      
       // executing user given query
       async queryData(){
 
         // connect prefixes with query body
         let queryText = this.code;
 
-        this.prefixTextDecls.forEach(element => {
+        this.prefixTextDeclarations.forEach(element => {
           queryText = element.code + queryText;
         });
 
@@ -244,6 +253,9 @@
           // emit that the fetching of data ended, so hide spinner
           this.$emit('loadingResult', false);
 
+
+          console.log(answerToQuery);
+
           // emit answer if everything was OK and data was found
           if((this.queryType == "ask" && 'boolean' in answerToQuery) || 
             (this.queryType == "select" && answerToQuery.results.bindings.length > 0) ||
@@ -261,6 +273,7 @@
         }
 
       },
+
       // validation of the query typed in by the user 
       validateQuery(code,parser){
         try {
@@ -286,12 +299,14 @@
           }
         }
       },
+
       // function to remove error icon placeholder divs from document 
       deleteDivs(){
         for (let index = 1; index <= this.newRowsCount-this.oldRowsCount+1; index++) {
           document.getElementById(index).remove();  
         }
       },
+
       // searching for the nth occurrence of pattern in string
       // returns index of the occurrence
       nthIndex(str, pat, n){
@@ -302,6 +317,7 @@
           }
           return i;
       },
+
       // controlling if server response contains error
       async errorHandler(res){
         if(!res.ok){
@@ -318,6 +334,7 @@
           
         }
       },
+
       // automatic completion of prefixes
       searchPrefixesToComplete(code){
         let newlyFoundPrefs = [];
@@ -336,7 +353,7 @@
                 newlyFoundPrefs.push(prefix);
                 if(!this.alreadyAddedPrefs.includes(prefix)){
                   // store text representation of prefix (declaration)
-                  this.prefixTextDecls.push({
+                  this.prefixTextDeclarations.push({
                     "prefix":prefix,
                     "code":"PREFIX " + prefix +": <" +nameSpacePrefixTuple.namespace+ ">"
                   })
@@ -355,7 +372,7 @@
             this.alreadyAddedPrefs.forEach(e => {
               if(!newlyFoundPrefs.includes(e)) {
                 this.htmlCode = this.htmlCode.filter(i => i.prefix !== e);
-                this.prefixTextDecls = this.prefixTextDecls.filter(i => i.prefix !== e);              
+                this.prefixTextDeclarations = this.prefixTextDeclarations.filter(i => i.prefix !== e);              
               } 
             });
 
@@ -370,11 +387,11 @@
           // no prefix found in the query
           this.alreadyAddedPrefs = [];
           this.htmlCode = [];
-          this.prefixTextDecls = []; 
+          this.prefixTextDeclarations = []; 
         }
       },
 
-      setTdInnerHtml(){
+      setPrefixDeclarationsTdInnerHtml(){
         // wait until DOM is re-rendered
         this.$nextTick(()=>{
          
@@ -388,8 +405,8 @@
       )
       },
 
+      // save user specified query to local storage
       saveQueryToLocalStorage(){
-        // save user specified query to local storage
 
         if(this.queryName.length > 0 && this.code.length > 0){
           //TODO: have to control if the name is already in use ?   

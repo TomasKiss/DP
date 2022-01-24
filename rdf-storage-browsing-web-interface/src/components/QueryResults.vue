@@ -24,8 +24,9 @@
             <template #loading>
               Loading data. Please wait.
             </template>
+
             <Column v-for="(col,i) in columns" :field="col" :header="col" :key="i" :filterField="`${col}f`">
-            <template #body="slotProps">
+              <template #body="slotProps">
                   <Button @click="exploreResource(slotProps.data[col].tol)" 
                     v-tooltip.bottom="slotProps.data[col].tol" class="p-button-link">{{slotProps.data[col].val}}</Button>
               </template>
@@ -33,6 +34,7 @@
                   <InputText type="text" v-model="filterModel.value" @keydown.enter="filterCallback()" class="p-column-filter" :placeholder="`Search by ${filterModel.matchMode}`" v-tooltip.top.focus="'Hit enter key to filter'"/>
               </template>
             </Column>
+
         </DataTable>
     </div>
     <div v-else-if="result.data[2] == 'ask'">
@@ -101,16 +103,20 @@ export default {
       // function activating resource exploration component
       exploreResource(resource){
         this.filters = {};
+        // base column filter
         this.filters['global'] = { value: null, matchMode: FilterMatchMode.CONTAINS };
 
         this.resource = resource;
-        // console.log(this.resource, resource);
+        // if data exists for the chosen resource
         if(this.resource !== '')
           this.showUserQueryRes = true;
       },
+
       clearFilter(){
         this.filter = {};
       },
+
+      // set needed variables based on the response for its correct visualization
       processResponse(){
         if(this.result) {
           // hide table and ask result
@@ -133,6 +139,7 @@ export default {
           } 
         }  
       },
+
       // parse the content of the construct query response
       processConstructResult(res){
             // store column headers 
@@ -176,6 +183,7 @@ export default {
             });
             console.log("new CONSTRUCT result: ",this.columns, this.computedResult);
       },
+      
       // parse the content of the select query response
       processSelectResult(res){
         // store column headers 
