@@ -1,0 +1,47 @@
+<template>
+  <div class="main p-grid p-flex-column">
+    <div class="p-col">
+      <VueEditor @resultReturn="resultsHandler" @loadingResult="loadingStart"/>
+    </div>
+    <div class="p-col">
+      <!-- show results if they are ready -->
+      <QueryResults v-if="queryResult && !loading" :result="queryResult"/>
+      <!-- show spinner when the data is not ready yet -->
+      <img v-else-if="loading" :src="require('../assets/hourglass.gif')" alt="" class="" />
+    </div>
+  </div>
+</template>
+
+<script>
+// @ is an alias to /src
+import VueEditor from "@/components/VueEditor.vue"
+import QueryResults from "@/components/QueryResults.vue"
+
+export default {
+  name: 'Home',
+  components: {
+    VueEditor,
+    QueryResults
+  },
+  data() {
+    return {
+      queryResult:'',
+      loading: false,
+    }
+  },
+  methods: {
+    resultsHandler(e){
+      this.queryResult = e;
+    },
+    loadingStart(e){
+      this.loading = e;
+    }
+  }
+}
+</script>
+
+<style>
+.main{
+  margin: 0 10vw;
+}
+</style>
