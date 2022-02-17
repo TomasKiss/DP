@@ -12,23 +12,23 @@ const routes = [
     component: Home,
   },
   {
-    path: "/:repo/namespaces",
+    path: "/r/:repo/namespaces",
     name: "Namespaces",
     component: Namespaces,
   },
   {
-    path: "/:repo/insert",
+    path: "/r/:repo/insert",
     name: "InsertDataPage",
     component: InsertDataPage,
   },
   {
-    path: "/:repo/saved_queries",
+    path: "/r/:repo/saved_queries",
     name: "SavedQueriesPage",
     component: SavedQueriesPage,
   },
   // catchall 404
   {
-    path: "/:repo/:catchAll(.*)",
+    path: "/r/:repo/:catchAll(.*)",
     name: "NotFound",
     component: NotFound,
   },
