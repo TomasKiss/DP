@@ -14,11 +14,11 @@
 
 <script>
 // @ is an alias to /src
-import VueEditor from "@/components/VueEditor.vue"
-import QueryResults from "@/components/QueryResults.vue"
+import VueEditor from "./VueEditor.vue"
+import QueryResults from "./QueryResults.vue"
 
 export default {
-  name: 'Home',
+  name: 'MainComponent',
   components: {
     VueEditor,
     QueryResults

@@ -72,7 +72,7 @@
   import { config } from '../../config';
   
   export default {
-    name:'App',
+    name:'VueEditor',
     components: {
       PrismEditor,
       Button,
