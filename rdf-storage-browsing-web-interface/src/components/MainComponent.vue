@@ -18,7 +18,7 @@ import VueEditor from "@/components/VueEditor.vue"
 import QueryResults from "@/components/QueryResults.vue"
 
 export default {
-  name: 'Home',
+  name: 'MainComponent',
   components: {
     VueEditor,
     QueryResults
