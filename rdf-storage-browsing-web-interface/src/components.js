@@ -1,16 +1,7 @@
-import InsertData from "./components/InsertData.vue";
-import QueryResults from "./components/QueryResults.vue";
-import ResourceExplorer from "./components/ResourceExplorer.vue";
-import SavedQueries from "./components/SavedQueries.vue";
-import MainComponent from "./components/MainComponent.vue";
-import VueEditor from "./components/VueEditor.vue";
-import HelloWorld from "./components/HelloWorld.vue";
-
-export default {
-  InsertData,
-  QueryResults,
-  SavedQueries,
-  ResourceExplorer,
-  MainComponent,
-  VueEditor,
-};
+export { default as InsertData } from "./components/InsertData.vue";
+export { default as QueryResults } from "./components/QueryResults.vue";
+export { default as ResourceExplorer } from "./components/ResourceExplorer.vue";
+export { default as SavedQueries } from "./components/SavedQueries.vue";
+export { default as MainComponent } from "./components/MainComponent.vue";
+export { default as VueEditor } from "./components/VueEditor.vue";
+export { default as HelloWorld } from "./components/HelloWorld.vue";
