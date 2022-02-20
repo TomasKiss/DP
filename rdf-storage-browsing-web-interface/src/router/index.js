@@ -1,7 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import Home from '../views/Home.vue'
-import Namespaces from '../views/Namespaces.vue'
-import NotFound from '../views/NotFound.vue'
+import NamespacesPage from "../views/NamespacesPage.vue";
+import NotFound from "../views/NotFound.vue";
 import InsertDataPage from "../views/InsertDataPage.vue";
 import SavedQueriesPage from "../views/SavedQueriesPage.vue";
 
@@ -13,8 +13,8 @@ const routes = [
   },
   {
     path: "/r/:repo/namespaces",
-    name: "Namespaces",
-    component: Namespaces,
+    name: "NamespacesPage",
+    component: NamespacesPage,
   },
   {
     path: "/r/:repo/insert",

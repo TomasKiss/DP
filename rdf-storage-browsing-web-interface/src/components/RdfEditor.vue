@@ -67,12 +67,12 @@
   import InputText from 'primevue/inputtext';
 
   // Sparql parser to validate query
-  import Sparqljs from 'sparqljs'
+  import Sparqljs from 'sparqljs';
 
   import { config } from '../../config';
   
   export default {
-    name:'VueEditor',
+    name:'RdfEditor',
     components: {
       PrismEditor,
       Button,

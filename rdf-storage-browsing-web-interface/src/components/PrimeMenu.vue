@@ -35,7 +35,7 @@ export default {
             {
               label: 'Prefix declarations',
               icon: 'pi pi-list',
-              to:{name: 'Namespaces'}      
+              to:{name: 'NamespacesPage'}      
             },
             {
               label: 'Saved queries',

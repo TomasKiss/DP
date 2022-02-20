@@ -1,7 +1,7 @@
 <template>
   <div class="main p-grid p-flex-column">
     <div class="p-col">
-      <VueEditor @resultReturn="resultsHandler" @loadingResult="loadingStart"/>
+      <RdfEditor @resultReturn="resultsHandler" @loadingResult="loadingStart"/>
     </div>
     <div class="p-col">
       <!-- show results if they are ready -->
@@ -14,13 +14,13 @@
 
 <script>
 // @ is an alias to /src
-import VueEditor from "./VueEditor.vue"
+import RdfEditor from "./RdfEditor.vue"
 import QueryResults from "./QueryResults.vue"
 
 export default {
   name: 'MainComponent',
   components: {
-    VueEditor,
+    RdfEditor,
     QueryResults
   },
   data() {
