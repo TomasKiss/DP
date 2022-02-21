@@ -1,64 +1,44 @@
 <template>
-<Toast/>
+    <Toast/>
+    <ConfirmDialog></ConfirmDialog>
 
-<DataTable :value="allQueriesName.data" responsiveLayout="scroll" 
-    :paginator="true" :rows="10"
-    paginatorTemplate="CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
-    :rowsPerPageOptions="[10,20,50]"
-    currentPageReportTemplate="Showing {first} to {last} of {totalRecords}"
-    headerStyle="text-align: center"
-    >
+    <DataTable :value="allQueriesName.data" responsiveLayout="scroll" 
+        :paginator="true" :rows="10"
+        paginatorTemplate="CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
+        :rowsPerPageOptions="[10,20,50]"
+        currentPageReportTemplate="Showing {first} to {last} of {totalRecords}"
+        headerStyle="text-align: center"
+        >
 
-    <template #empty>
-        No data found.
-    </template>
-
-    <template #loading>
-        Loading data. Please wait.
-    </template>
-    <Column header="Saved query" bodyStyle="text-align: center">
-        <template #body="slotProps">
-            {{slotProps.data.name}}
+        <template #empty>
+            No data found.
         </template>
-    </Column>
 
-    <Column  header="Options" bodyStyle="text-align: center">
-        <template #body="slotProps">
-            <!-- <Button @click="showQuery(slotProps.data.name)" class="p-button-sm margin-right"
-            v-tooltip.bottom="'Show query'">Show</Button> -->
-
-            <Button @click="editQuery(slotProps.data.name)" class="p-button-sm margin-right p-button-warning" v-tooltip.bottom="'Edit query'">
-                <i class="pi pi-pencil"></i>
-            </Button>
-
-            <Button @click="confirmRemove(slotProps.data.name)" class="p-button-sm p-button-danger" v-tooltip.bottom="'Remove query'">
-                <i class="pi pi-trash"></i>
-            </Button>
-
+        <template #loading>
+            Loading data. Please wait.
         </template>
-    </Column>
-</DataTable>  
-<Toast position="bottom-center" group="bc">
-    <template #message="slotProps">
-        <div class="p-d-flex p-flex-column">
-            <div class="p-text-center">
-                <i class="pi pi-exclamation-triangle" style="font-size: 3rem"></i>
-                <h4>Are you sure you want to remove this saved query?</h4>
-                <p></p>
-            </div>
-            <div class="p-grid p-fluid">
-                <div class="p-col-6">
-                    <Button class="p-button-success" label="Yes" @click="onConfirmRemove(slotProps.message.name)" />
-                </div>
-                <div class="p-col-6">
-                    <Button class="p-button-secondary" label="No" @click="onRejectRemove" />
-                </div>
-            </div>
-        </div>
-    </template>
-</Toast>
+        <Column header="Saved query" bodyStyle="text-align: center">
+            <template #body="slotProps">
+                {{slotProps.data.name}}
+            </template>
+        </Column>
 
+        <Column  header="Options" bodyStyle="text-align: center">
+            <template #body="slotProps">
+                <!-- <Button @click="showQuery(slotProps.data.name)" class="p-button-sm margin-right"
+                v-tooltip.bottom="'Show query'">Show</Button> -->
 
+                <Button @click="editQuery(slotProps.data.name)" class="p-button-sm margin-right p-button-warning" v-tooltip.bottom="'Edit query'">
+                    <i class="pi pi-pencil"></i>
+                </Button>
+
+                <Button @click="confirmRemove(slotProps.data.name)" class="p-button-sm p-button-danger" v-tooltip.bottom="'Remove query'">
+                    <i class="pi pi-trash"></i>
+                </Button>
+
+            </template>
+        </Column>
+    </DataTable>  
 </template>
 
 <script>
@@ -66,6 +46,7 @@ import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
 import Button from 'primevue/button';
 import Toast from 'primevue/toast';
+import ConfirmDialog from 'primevue/confirmdialog';
 
 export default {
     name: 'SavedQueries',
@@ -74,6 +55,8 @@ export default {
       Column,
       Button,
       Toast,
+      ConfirmDialog,  
+
     },
     data() {
         return {
@@ -108,16 +91,24 @@ export default {
         },
         // open toast to confirm removal of namespace
         confirmRemove(queryName){
-            this.$toast.add({severity: 'warn', name: queryName, group: 'bc'});
-        },
-        // removal of query was rejected, close toast
-        onRejectRemove() {
-            this.$toast.removeGroup('bc');
+            // this.$toast.add({severity: 'warn', name: queryName, group: 'bc'});
+            this.$confirm.require({
+                message: 'Are you sure you want to remove this saved query??',
+                header: 'Delete Confirmation',
+                icon: 'pi pi-info-circle',
+                position: 'bottom',
+                accept: () => {
+                    this.onConfirmRemove(queryName);
+                },
+                reject: () => {
+                    this.$toast.add({severity:'error', summary:'Rejected', detail:'You have rejected', life: 3000});
+                }
+            });
         },
         // removal of query after confirmation
         onConfirmRemove(queryName) {
             this.deleteQuery(queryName);
-            this.$toast.removeGroup('bc');
+            // this.$toast.removeGroup('bc');
         },
         // Delete the chosen query from local storage
         deleteQuery(queryName){
@@ -128,6 +119,7 @@ export default {
             
             this.allQueriesName.data = [];
             this.getAllQueriesName();
+            this.$toast.add({severity:'success', summary: 'Successfully removed', detail:'Query was removed.', life: 3000});
 
         },
         // Show the chosen query in editor 

@@ -1,7 +1,8 @@
 <template>
   <div class="namespaces">
     <div class="">
-        <!-- <Toast/> -->
+    <Toast></Toast>
+    <ConfirmDialog></ConfirmDialog>
     <Dialog header="New Namespace" v-model:visible="displayCreateModal" :style="{width: '50vw'}" :position="position" :modal="true">
       <div class="p-fluid">
           <div class="p-field">
@@ -55,11 +56,11 @@
                 <Column  field="namespace" header="Namespace"></Column>
                 <Column  header="Options"> 
                   <template #body="slotProps">
-                        <Button @click="openEditModal(position,slotProps.data.prefix)" class="p-button-sm margin-right p-button-warning" v-tooltip.right="'Edit'">
-                          <i class="pi pi-pencil"></i>
-                        </Button>
                         <Button @click="confirmRemove(slotProps.data.prefix)" class="p-button-sm p-button-danger" v-tooltip.right="'Remove'">
                           <i class="pi pi-trash"></i>
+                        </Button>
+                        <Button @click="openEditModal(position,slotProps.data.prefix)" class="p-button-sm margin-right p-button-warning" v-tooltip.right="'Edit'">
+                          <i class="pi pi-pencil"></i>
                         </Button>
                   </template>
                 </Column>
@@ -86,6 +87,8 @@ import Button from 'primevue/button';
 import Dialog from 'primevue/dialog';
 import InputText from 'primevue/inputtext';
 import {config} from '../../config';
+import ConfirmDialog from 'primevue/confirmdialog';
+import Toast from 'primevue/toast';
 
 export default {
   name: 'NamespacesMaintenance',
@@ -95,7 +98,9 @@ export default {
     Column,
     Button,
     Dialog,
-    InputText
+    InputText,
+    ConfirmDialog,
+    Toast
   },
   data() {
     return {
@@ -120,25 +125,25 @@ export default {
     this.queryAllNamespaces();
     this.loading = false;
   },    
-    watch: { 
-        prefix: function(newVal, oldVal) { // watch it
-            this.onConfirmRemove(newVal);
-        }
-    },
   methods:{
     // open toast to confirm removal of namespace
     confirmRemove(prefixToRemove){
-    //   this.smallToast = false;  
-    //   this.$toast.add({severity: 'warn', prefix: prefixToRemove});
-
-      this.$emit('update-toast', ["confirmRemove",prefixToRemove]);
+      // this.$toast.add({severity: 'warn', prefix: prefixToRemove});
+      this.$confirm.require({
+          message: 'Do you want to delete "'+ prefixToRemove.toUpperCase() + '"?',
+          header: 'Delete Confirmation',
+          icon: 'pi pi-info-circle',
+          position: 'bottom',
+          accept: () => {
+            this.onConfirmRemove(prefixToRemove);
+          },
+          reject: () => {
+            this.$toast.add({severity:'error', summary:'Rejected', detail:'You have rejected', life: 3000});
+          }
+      });
     },
     // removal of namespace after confirmation
     async onConfirmRemove(prefixToRemove) {
-    //   this.smallToast = true;  
-    //   this.$toast.removeAllGroups()
-      this.$emit('update-toast', ["removeAll"]);
-
       const res = 
       // await fetch(config.server_url+'rdf4j-server/repositories/1/namespaces/'+prefixToRemove,
       await fetch(config.fitlayout_server_url+'api/r/'+this.$route.params.repo+'/repository/namespaces/'+prefixToRemove,
@@ -146,22 +151,14 @@ export default {
         method: 'DELETE',
       })
       .then(
-        // this.$toast.add({severity:'success', summary: 'Successfully removed', detail:'Namespaces was removed.', life: 3000}),
-        this.$emit('update-toast', ["onConfirmRemove"]),
+        this.$toast.add({severity:'success', summary: 'Successfully removed', detail:'Namespaces was removed.', life: 3000}),
 
         this.tableData.data = this.tableData.data.filter(item => item.prefix != prefixToRemove)
       )
       .catch(error =>
-        // this.$toast.add({severity:'error', summary: 'Error', detail:error, life: 3000}),
-        this.$emit('update-toast', ["error", error])
+        this.$toast.add({severity:'error', summary: 'Error', detail:error, life: 3000}),
       )
     
-    },
-    // removal of namespace was rejected, close toast
-    onRejectRemove() {
-    //   this.$toast.removeAllGroups()
-      this.$emit('update-toast', ["removeAll"]);
-
     },
     // opening and positioning modal for namespace creation
     openCreateModal(position) {
@@ -192,8 +189,7 @@ export default {
           },
           body:this.newNSname  
         }).then(
-        //   this.$toast.add({severity:'success', summary: 'Success creation', detail:'New namespaces created', life: 3000}),
-          this.$emit('update-toast', ["closeCreateModal"]),
+          this.$toast.add({severity:'success', summary: 'Success creation', detail:'New namespaces created', life: 3000}),
           this.tableData.data.push({
             'prefix': this.newNSprefix,
             'namespace': this.newNSname
@@ -203,8 +199,7 @@ export default {
           this.newNSprefix = '',
 
         ).catch(error =>
-        //   this.$toast.add({severity:'error', summary: 'Error', detail:error, life: 3000})
-            this.$emit('update-toast', ["error", error])
+          this.$toast.add({severity:'error', summary: 'Error', detail:error, life: 3000})
         )
         
         this.displayCreateModal = false;
@@ -215,8 +210,6 @@ export default {
     async closeEditModal() {
       // TODO: Control if namespace is given???
       if(this.prefixEditNS !== ''){
-          this.smallToast = true;  
-
           const res =
           //  await fetch(config.server_url+'rdf4j-server/repositories/1/namespaces/'+this.prefixEditNS,
           await fetch(config.fitlayout_server_url+'api/r/'+this.$route.params.repo+'/repository/namespaces/'+this.prefixEditNS,
@@ -227,9 +220,7 @@ export default {
           },
           body:this.editedNSname 
         }).then(
-        //   this.$toast.add({severity:'success', summary: 'Successful edit', detail:'Namespace successfully updated!', life: 3000}),
-          this.$emit('update-toast', ["closeEditModal"]),
-
+          this.$toast.add({severity:'success', summary: 'Successful edit', detail:'Namespace successfully updated!', life: 3000}),
           this.tableData.data[this.tableData.data.findIndex(item => item.prefix === this.prefixEditNS)].namespace = this.editedNSname,
 
           // clearing input text values
@@ -237,8 +228,7 @@ export default {
           this.editedNSname = '',
 
         ).catch(error =>
-        //   this.$toast.add({severity:'error', summary: 'Error', detail:error, life: 3000})
-            this.$emit('update-toast', ["error", error])
+          this.$toast.add({severity:'error', summary: 'Error', detail:error, life: 3000})
         )
       }
 
@@ -266,13 +256,24 @@ export default {
     },
     async errorHandler(res){
       if(!res.ok){
-        this.smallToast = true;  
-        // this.$toast.add({severity:'error', summary: 'Error', detail:"Error happened during execution!", life: 3000});
-        this.$emit('update-toast', ["error", "Error happened during execution!"]);
-
+        this.$toast.add({severity:'error', summary: 'Error', detail:"Error happened during execution!", life: 3000});
       } else {
         return await res.json()
       }
+    },
+    confirmPosition() {
+      this.$confirm.require({
+          message: 'Do you want to delete this record?',
+          header: 'Delete Confirmation',
+          icon: 'pi pi-info-circle',
+          position: 'bottom',
+          accept: () => {
+              this.$toast.add({severity:'info', summary:'Confirmed', detail:'Record deleted', life: 3000});
+          },
+          reject: () => {
+              this.$toast.add({severity:'error', summary:'Rejected', detail:'You have rejected', life: 3000});
+          }
+      });
     }
   }
 }
