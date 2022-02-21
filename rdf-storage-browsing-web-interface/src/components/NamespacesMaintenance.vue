@@ -1,9 +1,36 @@
 <template>
   <div class="namespaces">
     <div class="">
-      <PrimeMenu/>
+        <!-- <Toast/> -->
+    <Dialog header="New Namespace" v-model:visible="displayCreateModal" :style="{width: '50vw'}" :position="position" :modal="true">
+      <div class="p-fluid">
+          <div class="p-field">
+              <label for="prefix">Prefix</label>
+              <InputText id="prefixC" type="text" v-model="newNSprefix"/>
+          </div>
+          <div class="p-field">
+              <label for="namespace">Namespace</label>
+              <InputText id="namespaceC" type="text" v-model="newNSname"/>
+          </div>
+      </div>
+      <template #footer>
+          <Button label="Create" icon="pi pi-check" @click="closeCreateModal" autofocus />
+      </template>
+    </Dialog>
+
+    <Dialog :header="`Edit namespace for prefix: ${prefixEditNS}`" v-model:visible="displayEditModal" :style="{width: '50vw'}" :position="position" :modal="true">
+      <div class="p-fluid">
+          <div class="p-field">
+              <label for="namespace">New Namespace</label>
+              <InputText id="namespaceE" type="text" v-model="editedNSname"/>
+          </div>
+      </div>
+      <template #footer>
+          <Button label="Save" icon="pi pi-check" @click="closeEditModal" autofocus />
+      </template>
+    </Dialog>
+    
     </div>
-    <Toast/>
     <div v-if="!loading">
       <div class="p-grid p-flex-column main">
         <div class="p-col-12">
@@ -46,77 +73,27 @@
       </div>
       <img :src="require('../assets/hourglass.gif')" alt="" class="" />
     </div>
-    <Toast position="bottom-center" group="bc">
-        <template #message="slotProps">
-            <div class="p-d-flex p-flex-column">
-                <div class="p-text-center">
-                    <i class="pi pi-exclamation-triangle" style="font-size: 3rem"></i>
-                    <h4>Are you sure you want to remove this namespace?</h4>
-                    <p></p>
-                </div>
-                <div class="p-grid p-fluid">
-                    <div class="p-col-6">
-                        <Button class="p-button-success" label="Yes" @click="onConfirmRemove(slotProps.message.prefix)" />
-                    </div>
-                    <div class="p-col-6">
-                        <Button class="p-button-secondary" label="No" @click="onRejectRemove" />
-                    </div>
-                </div>
-            </div>
-        </template>
-    </Toast>
 
-    <Dialog header="New Namespace" v-model:visible="displayCreateModal" :style="{width: '50vw'}" :position="position" :modal="true">
-      <div class="p-fluid">
-          <div class="p-field">
-              <label for="prefix">Prefix</label>
-              <InputText id="prefixC" type="text" v-model="newNSprefix"/>
-          </div>
-          <div class="p-field">
-              <label for="namespace">Namespace</label>
-              <InputText id="namespaceC" type="text" v-model="newNSname"/>
-          </div>
-      </div>
-      <template #footer>
-          <Button label="Create" icon="pi pi-check" @click="closeCreateModal" autofocus />
-      </template>
-    </Dialog>
-
-    <Dialog :header="`Edit namespace for prefix: ${prefixEditNS}`" v-model:visible="displayEditModal" :style="{width: '50vw'}" :position="position" :modal="true">
-      <div class="p-fluid">
-          <div class="p-field">
-              <label for="namespace">New Namespace</label>
-              <InputText id="namespaceE" type="text" v-model="editedNSname"/>
-          </div>
-      </div>
-      <template #footer>
-          <Button label="Save" icon="pi pi-check" @click="closeEditModal" autofocus />
-      </template>
-    </Dialog>
-    
 
   </div>
 </template>
 
 <script>
-// @ is an alias to /src
-import PrimeMenu from "@/components/PrimeMenu.vue"
+
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
 import Button from 'primevue/button';
-import Toast from 'primevue/toast';
 import Dialog from 'primevue/dialog';
 import InputText from 'primevue/inputtext';
-import {config} from '../../config'
-// TODO: create a smaller component and leave here just its call
+import {config} from '../../config';
+
 export default {
-  name: 'Namespaces',
+  name: 'NamespacesMaintenance',
+  props : ['prefix'],
   components: {
-    PrimeMenu,
     DataTable,
     Column,
     Button,
-    Toast,
     Dialog,
     InputText
   },
@@ -136,21 +113,32 @@ export default {
       prefixEditNS:'',
       editedNSname:'',
       loading: true,
-
     }
   },
   async mounted() {
     this.loading = true;
     this.queryAllNamespaces();
     this.loading = false;
-  },
+  },    
+    watch: { 
+        prefix: function(newVal, oldVal) { // watch it
+            this.onConfirmRemove(newVal);
+        }
+    },
   methods:{
     // open toast to confirm removal of namespace
     confirmRemove(prefixToRemove){
-      this.$toast.add({severity: 'warn', prefix: prefixToRemove, group: 'bc'});
+    //   this.smallToast = false;  
+    //   this.$toast.add({severity: 'warn', prefix: prefixToRemove});
+
+      this.$emit('update-toast', ["confirmRemove",prefixToRemove]);
     },
     // removal of namespace after confirmation
     async onConfirmRemove(prefixToRemove) {
+    //   this.smallToast = true;  
+    //   this.$toast.removeAllGroups()
+      this.$emit('update-toast', ["removeAll"]);
+
       const res = 
       // await fetch(config.server_url+'rdf4j-server/repositories/1/namespaces/'+prefixToRemove,
       await fetch(config.fitlayout_server_url+'api/r/'+this.$route.params.repo+'/repository/namespaces/'+prefixToRemove,
@@ -158,18 +146,22 @@ export default {
         method: 'DELETE',
       })
       .then(
-        this.$toast.add({severity:'success', summary: 'Successfully removed', detail:'Namespaces was removed.', life: 3000}),
+        // this.$toast.add({severity:'success', summary: 'Successfully removed', detail:'Namespaces was removed.', life: 3000}),
+        this.$emit('update-toast', ["onConfirmRemove"]),
+
         this.tableData.data = this.tableData.data.filter(item => item.prefix != prefixToRemove)
       )
       .catch(error =>
-        this.$toast.add({severity:'error', summary: 'Error', detail:error, life: 3000})
+        // this.$toast.add({severity:'error', summary: 'Error', detail:error, life: 3000}),
+        this.$emit('update-toast', ["error", error])
       )
-      this.$toast.removeGroup('bc')
     
     },
     // removal of namespace was rejected, close toast
     onRejectRemove() {
-      this.$toast.removeGroup('bc');
+    //   this.$toast.removeAllGroups()
+      this.$emit('update-toast', ["removeAll"]);
+
     },
     // opening and positioning modal for namespace creation
     openCreateModal(position) {
@@ -188,6 +180,7 @@ export default {
       if(this.newNSname !== '' && this.newNSprefix !== ''){
         // TODO: Control if namespace/prefix already exists ???
         // TODO: Control if namespace/prefix correct format ???
+        this.smallToast = true;  
 
         const res = 
         // await fetch(config.server_url+'rdf4j-server/repositories/1/namespaces/'+this.newNSprefix,
@@ -199,7 +192,8 @@ export default {
           },
           body:this.newNSname  
         }).then(
-          this.$toast.add({severity:'success', summary: 'Success creation', detail:'New namespaces created', life: 3000}),
+        //   this.$toast.add({severity:'success', summary: 'Success creation', detail:'New namespaces created', life: 3000}),
+          this.$emit('update-toast', ["closeCreateModal"]),
           this.tableData.data.push({
             'prefix': this.newNSprefix,
             'namespace': this.newNSname
@@ -209,7 +203,8 @@ export default {
           this.newNSprefix = '',
 
         ).catch(error =>
-          this.$toast.add({severity:'error', summary: 'Error', detail:error, life: 3000})
+        //   this.$toast.add({severity:'error', summary: 'Error', detail:error, life: 3000})
+            this.$emit('update-toast', ["error", error])
         )
         
         this.displayCreateModal = false;
@@ -220,6 +215,8 @@ export default {
     async closeEditModal() {
       // TODO: Control if namespace is given???
       if(this.prefixEditNS !== ''){
+          this.smallToast = true;  
+
           const res =
           //  await fetch(config.server_url+'rdf4j-server/repositories/1/namespaces/'+this.prefixEditNS,
           await fetch(config.fitlayout_server_url+'api/r/'+this.$route.params.repo+'/repository/namespaces/'+this.prefixEditNS,
@@ -230,7 +227,9 @@ export default {
           },
           body:this.editedNSname 
         }).then(
-          this.$toast.add({severity:'success', summary: 'Successful edit', detail:'Namespace successfully updated!', life: 3000}),
+        //   this.$toast.add({severity:'success', summary: 'Successful edit', detail:'Namespace successfully updated!', life: 3000}),
+          this.$emit('update-toast', ["closeEditModal"]),
+
           this.tableData.data[this.tableData.data.findIndex(item => item.prefix === this.prefixEditNS)].namespace = this.editedNSname,
 
           // clearing input text values
@@ -238,7 +237,8 @@ export default {
           this.editedNSname = '',
 
         ).catch(error =>
-          this.$toast.add({severity:'error', summary: 'Error', detail:error, life: 3000})
+        //   this.$toast.add({severity:'error', summary: 'Error', detail:error, life: 3000})
+            this.$emit('update-toast', ["error", error])
         )
       }
 
@@ -266,7 +266,10 @@ export default {
     },
     async errorHandler(res){
       if(!res.ok){
-        this.$toast.add({severity:'error', summary: 'Error', detail:"Error happened during execution!", life: 3000});
+        this.smallToast = true;  
+        // this.$toast.add({severity:'error', summary: 'Error', detail:"Error happened during execution!", life: 3000});
+        this.$emit('update-toast', ["error", "Error happened during execution!"]);
+
       } else {
         return await res.json()
       }

@@ -99,6 +99,10 @@ if (!argv.format || argv.format === "es") {
       exports: "named",
     },
     plugins: [
+      modify({
+        "require('../assets/hourglass.gif')":
+          "require('./assets/hourglass.gif')",
+      }),
       replace(baseConfig.plugins.replace),
       ...baseConfig.plugins.preVue,
       css({ output: "bundle.css" }),
@@ -122,7 +126,6 @@ if (!argv.format || argv.format === "es") {
           ],
         ],
       }),
-      modify({ "..assets/hourglass.gif": "./assets/hourglass.gif" }),
     ],
   };
   buildFormats.push(esConfig);
