@@ -105,7 +105,7 @@ if (!argv.format || argv.format === "es") {
       }),
       replace(baseConfig.plugins.replace),
       ...baseConfig.plugins.preVue,
-      css({ output: "bundle.css" }),
+      css({ output: "style.css" }),
       copy({
         assets: [
           // You can include directories
@@ -146,7 +146,7 @@ if (!argv.format || argv.format === "cjs") {
     plugins: [
       replace(baseConfig.plugins.replace),
       ...baseConfig.plugins.preVue,
-      css({ output: "bundle.css" }),
+      css({ output: "style.css" }),
       copy({
         assets: [
           // You can include directories
@@ -177,7 +177,7 @@ if (!argv.format || argv.format === "iife") {
     plugins: [
       replace(baseConfig.plugins.replace),
       ...baseConfig.plugins.preVue,
-      css({ output: "bundle.css" }),
+      css({ output: "style.css" }),
       copy({
         assets: [
           // You can include directories
