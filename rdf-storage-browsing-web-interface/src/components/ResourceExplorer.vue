@@ -1,106 +1,104 @@
 <template>
   <Toast />
 
-<div>
-   <h3>Resource: {{res}}</h3>
-</div>
-<TabView :activeIndex="activePanel">
-	<TabPanel header="Subject" :disabled="!tableData.subject.length">
-      <DataTable  :value="tableData.subject" responsiveLayout="scroll"
-      :paginator="true" :rows="10"
-      paginatorTemplate="CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
-      :rowsPerPageOptions="[10,20,50]"
-      currentPageReportTemplate="Showing {first} to {last} of {totalRecords}"
-      filterDisplay="row"
-      v-model:filters="filters"
-      >
-         <Column  header="Predicate" filterField="a_p_val"> 
-            <template #body="slotProps">
-                  <Button @click="fetchResData(slotProps.data.a_p_tol)" 
-                     v-tooltip.bottom="slotProps.data.a_p_tol" :label="slotProps.data.a_p_val" class="p-button-link" />
-            </template>
-            <template #filter="{filterModel,filterCallback}">
-              <InputText type="text" v-model="filterModel.value" @keydown.enter="filterCallback()" class="p-column-filter" :placeholder="`Search by ${filterModel.matchMode}`" v-tooltip.top.focus="'Hit enter key to filter'"/>
-            </template>
-         </Column>
+   <div>
+      <h3>Resource: {{res}}</h3>
+   </div>
+   <TabView :activeIndex="activePanel">
+      <TabPanel header="Subject" :disabled="!tableData.subject.length">
+         <DataTable  :value="tableData.subject" responsiveLayout="scroll"
+         :paginator="true" :rows="10"
+         paginatorTemplate="CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
+         :rowsPerPageOptions="[10,20,50]"
+         currentPageReportTemplate="Showing {first} to {last} of {totalRecords}"
+         filterDisplay="row"
+         v-model:filters="filters"
+         >
+            <Column  header="Predicate" filterField="a_p_val"> 
+               <template #body="slotProps">
+                     <Button @click="fetchResData(slotProps.data.a_p_tol)" 
+                        v-tooltip.bottom="slotProps.data.a_p_tol" :label="slotProps.data.a_p_val" class="p-button-link" />
+               </template>
+               <template #filter="{filterModel,filterCallback}">
+               <InputText type="text" v-model="filterModel.value" @keydown.enter="filterCallback()" class="p-column-filter" :placeholder="`Search by ${filterModel.matchMode}`" v-tooltip.top.focus="'Hit enter key to filter'"/>
+               </template>
+            </Column>
 
-         <Column  header="Object" filterField="a_o_val"> 
-            <template #body="slotProps">
-                  <Button @click="fetchResData(slotProps.data.a_o_tol)"
-                     v-tooltip.bottom="slotProps.data.a_o_tol" :label="slotProps.data.a_o_val" class="p-button-link" />
-            </template>
-            <template #filter="{filterModel,filterCallback}">
-              <InputText type="text" v-model="filterModel.value" @keydown.enter="filterCallback()" class="p-column-filter" :placeholder="`Search by ${filterModel.matchMode}`" v-tooltip.top.focus="'Hit enter key to filter'"/>
-            </template>   
-         </Column>
+            <Column  header="Object" filterField="a_o_val"> 
+               <template #body="slotProps">
+                     <Button @click="fetchResData(slotProps.data.a_o_tol)"
+                        v-tooltip.bottom="slotProps.data.a_o_tol" :label="slotProps.data.a_o_val" class="p-button-link" />
+               </template>
+               <template #filter="{filterModel,filterCallback}">
+               <InputText type="text" v-model="filterModel.value" @keydown.enter="filterCallback()" class="p-column-filter" :placeholder="`Search by ${filterModel.matchMode}`" v-tooltip.top.focus="'Hit enter key to filter'"/>
+               </template>   
+            </Column>
 
-      </DataTable>
-	</TabPanel>
-	<TabPanel header="Predicate" :disabled="!tableData.predicate.length">
-      <DataTable  :value="tableData.predicate" responsiveLayout="scroll"
-      :paginator="true" :rows="10"
-      paginatorTemplate="CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
-      :rowsPerPageOptions="[10,20,50]"
-      currentPageReportTemplate="Showing {first} to {last} of {totalRecords}"
-      filterDisplay="row"
-      v-model:filters="filters"
-      >
-         <Column  header="Subject" filterField="b_s_val"> 
-            <template #body="slotProps">
-                  <Button @click="fetchResData(slotProps.data.b_s_tol)" 
-                     v-tooltip.bottom="slotProps.data.b_s_tol" :label="slotProps.data.b_s_val" class="p-button-link" />
-            </template>
-            <template #filter="{filterModel,filterCallback}">
-              <InputText type="text" v-model="filterModel.value" @keydown.enter="filterCallback()" class="p-column-filter" :placeholder="`Search by ${filterModel.matchMode}`" v-tooltip.top.focus="'Hit enter key to filter'"/>
-            </template>
-         </Column>
+         </DataTable>
+      </TabPanel>
+      <TabPanel header="Predicate" :disabled="!tableData.predicate.length">
+         <DataTable  :value="tableData.predicate" responsiveLayout="scroll"
+         :paginator="true" :rows="10"
+         paginatorTemplate="CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
+         :rowsPerPageOptions="[10,20,50]"
+         currentPageReportTemplate="Showing {first} to {last} of {totalRecords}"
+         filterDisplay="row"
+         v-model:filters="filters"
+         >
+            <Column  header="Subject" filterField="b_s_val"> 
+               <template #body="slotProps">
+                     <Button @click="fetchResData(slotProps.data.b_s_tol)" 
+                        v-tooltip.bottom="slotProps.data.b_s_tol" :label="slotProps.data.b_s_val" class="p-button-link" />
+               </template>
+               <template #filter="{filterModel,filterCallback}">
+               <InputText type="text" v-model="filterModel.value" @keydown.enter="filterCallback()" class="p-column-filter" :placeholder="`Search by ${filterModel.matchMode}`" v-tooltip.top.focus="'Hit enter key to filter'"/>
+               </template>
+            </Column>
 
-         <Column  header="Object" filterField="b_o_val"> 
-            <template #body="slotProps">
-                  <Button @click="fetchResData(slotProps.data.b_o_tol)"
-                     v-tooltip.bottom="slotProps.data.b_o_tol" :label="slotProps.data.b_o_val" class="p-button-link" />
-            </template>
-            <template #filter="{filterModel,filterCallback}">
-              <InputText type="text" v-model="filterModel.value" @keydown.enter="filterCallback()" class="p-column-filter" :placeholder="`Search by ${filterModel.matchMode}`" v-tooltip.top.focus="'Hit enter key to filter'"/>
-            </template>
-         </Column>
+            <Column  header="Object" filterField="b_o_val"> 
+               <template #body="slotProps">
+                     <Button @click="fetchResData(slotProps.data.b_o_tol)"
+                        v-tooltip.bottom="slotProps.data.b_o_tol" :label="slotProps.data.b_o_val" class="p-button-link" />
+               </template>
+               <template #filter="{filterModel,filterCallback}">
+               <InputText type="text" v-model="filterModel.value" @keydown.enter="filterCallback()" class="p-column-filter" :placeholder="`Search by ${filterModel.matchMode}`" v-tooltip.top.focus="'Hit enter key to filter'"/>
+               </template>
+            </Column>
 
-      </DataTable>
-   </TabPanel>
-	<TabPanel header="Object" :disabled="!tableData.object.length">
-      <DataTable  :value="tableData.object" responsiveLayout="scroll"
-      :paginator="true" :rows="10"
-      paginatorTemplate="CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
-      :rowsPerPageOptions="[10,20,50]"
-      currentPageReportTemplate="Showing {first} to {last} of {totalRecords}"
-      filterDisplay="row"
-      v-model:filters="filters"
-      >
-         <Column  header="Subject" filterField="c_s_val"> 
-            <template #body="slotProps">
-                  <Button @click="fetchResData(slotProps.data.c_s_tol)" 
-                     v-tooltip.bottom="slotProps.data.c_s_tol" :label="slotProps.data.c_s_val" class="p-button-link" />
-            </template>
-            <template #filter="{filterModel,filterCallback}">
-              <InputText type="text" v-model="filterModel.value" @keydown.enter="filterCallback()" class="p-column-filter" :placeholder="`Search by ${filterModel.matchMode}`" v-tooltip.top.focus="'Hit enter key to filter'"/>
-            </template>
-         </Column>
+         </DataTable>
+      </TabPanel>
+      <TabPanel header="Object" :disabled="!tableData.object.length">
+         <DataTable  :value="tableData.object" responsiveLayout="scroll"
+         :paginator="true" :rows="10"
+         paginatorTemplate="CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
+         :rowsPerPageOptions="[10,20,50]"
+         currentPageReportTemplate="Showing {first} to {last} of {totalRecords}"
+         filterDisplay="row"
+         v-model:filters="filters"
+         >
+            <Column  header="Subject" filterField="c_s_val"> 
+               <template #body="slotProps">
+                     <Button @click="fetchResData(slotProps.data.c_s_tol)" 
+                        v-tooltip.bottom="slotProps.data.c_s_tol" :label="slotProps.data.c_s_val" class="p-button-link" />
+               </template>
+               <template #filter="{filterModel,filterCallback}">
+               <InputText type="text" v-model="filterModel.value" @keydown.enter="filterCallback()" class="p-column-filter" :placeholder="`Search by ${filterModel.matchMode}`" v-tooltip.top.focus="'Hit enter key to filter'"/>
+               </template>
+            </Column>
 
-         <Column  header="Predicate" filterField="c_p_val"> 
-            <template #body="slotProps">
-                  <Button @click="fetchResData(slotProps.data.c_p_tol)"
-                     v-tooltip.bottom="slotProps.data.c_p_tol" :label="slotProps.data.c_p_val" class="p-button-link" />
-            </template>
-            <template #filter="{filterModel,filterCallback}">
-              <InputText type="text" v-model="filterModel.value" @keydown.enter="filterCallback()" class="p-column-filter" :placeholder="`Search by ${filterModel.matchMode}`" v-tooltip.top.focus="'Hit enter key to filter'"/>
-            </template>
-         </Column>
+            <Column  header="Predicate" filterField="c_p_val"> 
+               <template #body="slotProps">
+                     <Button @click="fetchResData(slotProps.data.c_p_tol)"
+                        v-tooltip.bottom="slotProps.data.c_p_tol" :label="slotProps.data.c_p_val" class="p-button-link" />
+               </template>
+               <template #filter="{filterModel,filterCallback}">
+               <InputText type="text" v-model="filterModel.value" @keydown.enter="filterCallback()" class="p-column-filter" :placeholder="`Search by ${filterModel.matchMode}`" v-tooltip.top.focus="'Hit enter key to filter'"/>
+               </template>
+            </Column>
 
-      </DataTable>
-   </TabPanel>
-</TabView>
-
-
+         </DataTable>
+      </TabPanel>
+   </TabView>
 
 </template>
 
@@ -126,10 +124,11 @@ export default {
       Button,
       InputText,
       FilterMatchMode,
-      Toast,
+      Toast
    },
    data() {
       return {
+         // beginning of query text
          qStart : 'SELECT * {',
          // container for data presented in table    
          tableData : {
@@ -226,7 +225,6 @@ export default {
       dataProcessing(data){
          this.filters['global'] = { value: null, matchMode: FilterMatchMode.CONTAINS };   
 
-
          data.results.bindings.forEach((element) => {   
             // store data for first tab panel (predicate, object)
             if(element.a_p && element.a_o){
@@ -298,7 +296,6 @@ export default {
          } else if(this.tableData.object.length > 0){
             this.activePanel = 2;
          }
-         // console.log("resfilt",this.filters);
       }
    }
 

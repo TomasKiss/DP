@@ -8,5 +8,3 @@ export default {
     components:{Button},
 };
 </script>
-<style lang="">
-</style>

@@ -9,8 +9,8 @@
 
 <script>
 // @ is an alias to /src
-import PrimeMenu from "@/components/PrimeMenu.vue"
-import MainComponent from "@/components/MainComponent.vue"
+import PrimeMenu from "@/components/PrimeMenu.vue";
+import MainComponent from "@/components/MainComponent.vue";
 
 export default {
   name: 'Home',

@@ -6,11 +6,11 @@
         </div>
         <div class="p-col-12 leftText">
             <h5 class="leftText">Upload data format</h5>
-            <Dropdown v-model="selectedFormat" :options="formats" optionLabel="name" optionValue="code" placeholder="Select a Format" />
+            <Dropdown v-model="selectedFormat" :options="formats" optionLabel="name" optionValue="code" placeholder="Select a Format"/>
         </div>
         <div class="p-col-12">
            <h3 class="leftText">Upload from URL</h3>
-            <span class="leftText" style="" >
+            <span class="leftText" >
                 <InputText id="url" type="text" v-model="url" class="p-inputtext p-component" placeholder="URL"/>
                 <!-- <label for="url" class="">URL</label> -->
             </span>
@@ -36,8 +36,8 @@
 
             <Textarea v-model="textData" :autoResize="true" rows="5" cols="80" placeholder="Data in text format"/>
         </div>    
-        <div class="p-col-12" style="text-align:center;margin-top:10px;">
-            <Button @click="uploadData" icon="pi pi-upload" iconPos="left" label="Upload" class="p-button-sm" />
+        <div class="p-col-12 uploadData">
+            <Button @click="uploadData" icon="pi pi-upload" iconPos="left" label="Upload" class="p-button-sm"/>
         </div>
     </div>
 
@@ -50,7 +50,6 @@ import InputText from 'primevue/inputtext';
 import Button from 'primevue/button';
 import Dropdown from 'primevue/dropdown';
 import Textarea from 'primevue/textarea';
-
 
 import { config } from '../../config';
 
@@ -75,8 +74,6 @@ export default {
                 {name: 'RDF/XML', code: 'application/rdf+xml'},
                 {name: 'N-Triples', code: 'application/n-triples'},
                 {name: 'N-Quads', code: 'application/n-quads'},
-                // {name: 'RDF/JSON', code: 'application/rdf+json'},
-
             ],
             textData: "",
         }
@@ -84,8 +81,8 @@ export default {
     methods: {
         // if file upload is selected by user
         onSelect(event) {
-            console.log(event.files)
-            this.file = event.files
+            console.log(event.files);
+            this.file = event.files;
         },
 
         // control if the all needed information is given by user and perform the upload
@@ -111,7 +108,7 @@ export default {
                     this.controlResponse(res, "URL");
                 })
                 .catch(error => 
-                    this.$toast.add({severity:'error', summary: 'Error', detail:error, life: 3000}),
+                    this.$toast.add({severity:'error', summary: 'Error', detail:error, life: 3000})
                 )
 
 
@@ -175,6 +172,12 @@ export default {
     text-align: left;
 }
 
+.uploadData {
+    text-align:center;
+    margin-top:10px;
+}
+
+/* classes from PrimeVue */
 .p-float-label>input:focus~label, .p-float-label>input.p-state-filled~label, 
 .p-float-label>.p-inputwrapper-focus~label, .p-float-label>.p-inputwrapper-filled~label 
 { top: -.75em; font-size: 12px; }

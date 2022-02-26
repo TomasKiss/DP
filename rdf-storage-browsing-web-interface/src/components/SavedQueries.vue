@@ -25,8 +25,6 @@
 
         <Column  header="Options" bodyStyle="text-align: center">
             <template #body="slotProps">
-                <!-- <Button @click="showQuery(slotProps.data.name)" class="p-button-sm margin-right"
-                v-tooltip.bottom="'Show query'">Show</Button> -->
 
                 <Button @click="editQuery(slotProps.data.name)" class="p-button-sm margin-right p-button-warning" v-tooltip.bottom="'Edit query'">
                     <i class="pi pi-pencil"></i>
@@ -55,8 +53,7 @@ export default {
       Column,
       Button,
       Toast,
-      ConfirmDialog,  
-
+      ConfirmDialog
     },
     data() {
         return {
@@ -68,7 +65,7 @@ export default {
         this.getAllQueriesName();
     },
     methods: {
-        // Get all queries saved in the local storage
+        // get all queries saved in the local storage
         getAllQueriesName() {
             if(localStorage.getItem('storedQueries')){
                 this.storedQueries = JSON.parse(localStorage.getItem('storedQueries'));
@@ -77,12 +74,11 @@ export default {
                     this.allQueriesName.data.push({
                         'name': item.name
                     });
-                
                 });
 
             }
         },
-        // Edit the chosen query
+        // edit the chosen query
         editQuery(queryName){
             this.$router.push({ name: 'Home', params: { name: queryName, repo: this.$route.params.repo, 
                 do: 'show'} 
@@ -110,7 +106,7 @@ export default {
             this.deleteQuery(queryName);
             // this.$toast.removeGroup('bc');
         },
-        // Delete the chosen query from local storage
+        // delete the chosen query from local storage
         deleteQuery(queryName){
             this.storedQueries = this.storedQueries.filter(item => item.name != queryName);
             
@@ -122,26 +118,13 @@ export default {
             this.$toast.add({severity:'success', summary: 'Successfully removed', detail:'Query was removed.', life: 3000});
 
         },
-        // Show the chosen query in editor 
+        // show the chosen query in editor 
         showQuery(queryName) {
             this.$router.push({ name: 'Home', params: { name: queryName, repo: this.$route.params.repo, 
                 do: 'show'} 
             });
 
         },
-        // executeQuery(queryName) {
-        //     // Execute the chosen query
-
-        //     this.$router.push({ name: 'Home', params: { name: queryName, repo: this.$route.params.repo, 
-        //         do: 'execute', query: this.$cookie.getCookie(queryName)} 
-        //     });
-        // },
-        
-
     },    
 }
 </script>
-
-<style>
-
-</style>

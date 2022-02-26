@@ -9,8 +9,8 @@
 
 <script>
 // @ is an alias to /src
-import PrimeMenu from "@/components/PrimeMenu.vue"
-import NamespacesMaintenance from "@/components/NamespacesMaintenance.vue"
+import PrimeMenu from "@/components/PrimeMenu.vue";
+import NamespacesMaintenance from "@/components/NamespacesMaintenance.vue";
 
 export default {
   name: 'NamespacesPage',
@@ -26,7 +26,3 @@ export default {
 
 }
 </script>
-
-<style>
-
-</style>

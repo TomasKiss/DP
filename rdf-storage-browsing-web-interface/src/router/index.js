@@ -1,5 +1,5 @@
-import { createRouter, createWebHistory } from 'vue-router'
-import Home from '../views/Home.vue'
+import { createRouter, createWebHistory } from "vue-router";
+import Home from "../views/Home.vue";
 import NamespacesPage from "../views/NamespacesPage.vue";
 import NotFound from "../views/NotFound.vue";
 import InsertDataPage from "../views/InsertDataPage.vue";
@@ -36,7 +36,7 @@ const routes = [
 
 const router = createRouter({
   history: createWebHistory(process.env.BASE_URL),
-  routes
-})
+  routes,
+});
 
-export default router
+export default router;

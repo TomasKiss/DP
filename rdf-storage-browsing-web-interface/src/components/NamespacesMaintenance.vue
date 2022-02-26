@@ -15,7 +15,7 @@
           </div>
       </div>
       <template #footer>
-          <Button label="Create" icon="pi pi-check" @click="closeCreateModal" autofocus />
+          <Button label="Create" icon="pi pi-check" @click="closeCreateModal" autofocus/>
       </template>
     </Dialog>
 
@@ -27,7 +27,7 @@
           </div>
       </div>
       <template #footer>
-          <Button label="Save" icon="pi pi-check" @click="closeEditModal" autofocus />
+          <Button label="Save" icon="pi pi-check" @click="closeEditModal" autofocus/>
       </template>
     </Dialog>
     
@@ -72,7 +72,7 @@
       <div class="">
         <h1>Fetching Data</h1>
       </div>
-      <img :src="require('../assets/hourglass.gif')" alt="" class="" />
+      <img :src="require('../assets/hourglass.gif')" alt="" class=""/>
     </div>
 
 
@@ -117,7 +117,7 @@ export default {
       // prefix for which the namespace will be edited
       prefixEditNS:'',
       editedNSname:'',
-      loading: true,
+      loading: true
     }
   },
   async mounted() {
@@ -177,7 +177,6 @@ export default {
       if(this.newNSname !== '' && this.newNSprefix !== ''){
         // TODO: Control if namespace/prefix already exists ???
         // TODO: Control if namespace/prefix correct format ???
-        this.smallToast = true;  
 
         const res = 
         // await fetch(config.server_url+'rdf4j-server/repositories/1/namespaces/'+this.newNSprefix,
@@ -234,6 +233,7 @@ export default {
 
       this.displayEditModal = false;
     },
+    // function to query all namespaces of the given repository
     async queryAllNamespaces(){
       this.data = await fetch(config.fitlayout_server_url
               +'api/r/'+this.$route.params.repo+'/repository/namespaces', {
@@ -258,23 +258,9 @@ export default {
       if(!res.ok){
         this.$toast.add({severity:'error', summary: 'Error', detail:"Error happened during execution!", life: 3000});
       } else {
-        return await res.json()
+        return await res.json();
       }
     },
-    confirmPosition() {
-      this.$confirm.require({
-          message: 'Do you want to delete this record?',
-          header: 'Delete Confirmation',
-          icon: 'pi pi-info-circle',
-          position: 'bottom',
-          accept: () => {
-              this.$toast.add({severity:'info', summary:'Confirmed', detail:'Record deleted', life: 3000});
-          },
-          reject: () => {
-              this.$toast.add({severity:'error', summary:'Rejected', detail:'You have rejected', life: 3000});
-          }
-      });
-    }
   }
 }
 </script>
@@ -283,6 +269,7 @@ export default {
 .main{
   margin: 0 10vw !important;
 }
+
 .margin-right{
   margin-right: 10px !important;
 }

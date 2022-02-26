@@ -59,7 +59,7 @@ import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
 import Button from 'primevue/button';
 import InputText from 'primevue/inputtext';
-import ResourceExplorer from './ResourceExplorer.vue'
+import ResourceExplorer from './ResourceExplorer.vue';
 import {FilterMatchMode,FilterOperator} from 'primevue/api';
 // N3 parser
 const N3 = require('n3');
@@ -73,7 +73,7 @@ export default {
       Button,
       ResourceExplorer,
       InputText,
-      FilterMatchMode,
+      FilterMatchMode
     },
     data() {
         return {
@@ -89,14 +89,12 @@ export default {
             global: { value: null, matchMode: FilterMatchMode.CONTAINS }
           },
           // the query was typ of ASK (boolean result)
-          // askQueryRes: false,   
           askRes: undefined,
           // parser for N3 construct queries 
-          n3Parser: new N3.Parser({ format: 'N-Triples' }),
+          n3Parser: new N3.Parser({ format: 'N-Triples' })
         }
     },
     mounted() {
-      // console.log("filters",this.filters);
       this.processResponse(); 
     },
     methods: {
@@ -122,13 +120,9 @@ export default {
           // hide table and ask result
           this.showUserQueryRes = false;
           this.askRes = undefined; 
-          
-          if(this.result.data[2] == "clear"){
-            // the result was empty
-
-          } else if(this.result.data[2] == "ask"){
+           
+          if(this.result.data[2] == "ask"){
             // ASK query 
-            // this.askQueryRes = true;
             this.askRes = this.result.data[0].boolean;
           } else if(this.result.data[2] == "select"){
             // SELECT query   
@@ -158,27 +152,24 @@ export default {
               (error, quad, prefixes) => {
                 // one quad represents one triple from teh answer
                 if (quad){
-                    let answers = {};
-                    // construct data object for each column int the row
-                    ['_subject', '_predicate','_object'].forEach(item => {
-                      // for column data store : value(with prefix), tooltip(with full URI), type(literal/uri/...)
-                      let word = {'val': quad[item].id, 'tol': quad[item].id, 'type': 'uri'};
+                  let answers = {};
+                  // construct data object for each column in the row
+                  ['_subject', '_predicate','_object'].forEach(item => {
+                    // for column data store : value(with prefix), tooltip(with full URI), type(literal/uri/...)
+                    let word = {'val': quad[item].id, 'tol': quad[item].id, 'type': 'uri'};
 
-                      // replace namespace with prefix if present
-                      this.result.data[1].forEach((el) => {
-                        word.val = word.val.replace(el.namespace, el.prefix+':');      
-                      })
-
-                      // store column data
-                      answers[item.substring(1,)] = word;  
-                      answers[item.substring(1,)+'f'] = word.val;  
-
+                    // replace namespace with prefix if present
+                    this.result.data[1].forEach((el) => {
+                      word.val = word.val.replace(el.namespace, el.prefix+':');      
                     })
-                    // store row data
-                    this.computedResult.push(answers);
 
-                } else {
-                  console.log("# That's all, folks!", prefixes);
+                    // store column data
+                    answers[item.substring(1,)] = word;  
+                    answers[item.substring(1,)+'f'] = word.val;  
+
+                  })
+                  // store row data
+                  this.computedResult.push(answers);
                 }
             });
             console.log("new CONSTRUCT result: ",this.columns, this.computedResult);
@@ -210,7 +201,7 @@ export default {
               // transform value if literal is the actual item, add datatype to value
               if(element[item].type !== 'uri' && element[item].datatype){
                 
-                word.tol = '"' +word.val+'"^^xsd:'+element[item].datatype.substring(element[item].datatype.indexOf("#")+1);;
+                word.tol = '"' +word.val+'"^^xsd:'+element[item].datatype.substring(element[item].datatype.indexOf("#")+1);
               }
               
               // store column data

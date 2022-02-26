@@ -10,8 +10,8 @@
 </template>
 
 <script>
-  import Menubar from 'primevue/menubar';
-  import InputText from 'primevue/inputtext'
+import Menubar from 'primevue/menubar';
+import InputText from 'primevue/inputtext'
 
 export default {
   name: "PrimeMenu",
@@ -22,11 +22,6 @@ export default {
   data() {
     return {
       items:[
-        // {
-        //   label: 'Repositories',
-        //   icon: 'pi pi-folder',
-        //   to:{name: 'Repositories'}        
-        // },
         {
           label: 'Editor',
           icon: 'pi pi-pencil',
@@ -52,7 +47,3 @@ export default {
   },
 }
 </script>
-
-<style>
-
-</style>
