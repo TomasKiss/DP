@@ -108,7 +108,7 @@ export default {
   data() {
     return {
       // namespace info for repository
-      data: null,
+      allNamespaces: null,
       tableData: {"data":[]},
       // modal properties
       displayCreateModal: false,
@@ -184,38 +184,41 @@ export default {
     // Function to close modal and create new namespace in repository
     async closeCreateModal() {
       this.submittedDialog = true;
-      // control if needed input is given
+      // control if needed input is given and if namespace has correct format
       if(this.newNSname !== '' && this.newNSprefix !== '' && this.newNSname.match(/(http(s){0,1}:\/\/)\w+/g)){
-        // TODO: Control if namespace/prefix already exists ???
-        // TODO: Control if namespace/prefix correct format ???
+        // control if namespace/prefix already exists
+        if(this.tableData.data.some(item => item.prefix === this.newNSprefix || item.namespace === this.newNSname)){
+          this.$toast.add({severity:'error', summary: 'Error', detail: 'Prefix/Namespace already exists!', life: 3000})
+        } else {
+          // if namespace/prefix doesn't exists -> create
+          const res = 
+          // await fetch(config.server_url+'rdf4j-server/repositories/1/namespaces/'+this.newNSprefix,
+          await fetch(config.fitlayout_server_url+'api/r/'+this.$route.params.repo+'/repository/namespaces/'+this.newNSprefix,
+          {
+            method: 'PUT',
+            headers:{
+              'Content-Type': 'text/plain'
+            },
+            body:this.newNSname  
+          }).then(
+            this.$toast.add({severity:'success', summary: 'Success creation', detail:'New namespaces created', life: 3000}),
+            this.tableData.data.push({
+              'prefix': this.newNSprefix,
+              'namespace': this.newNSname
+            }),
+            // clearing inputtext values
+            this.newNSname = '',
+            this.newNSprefix = '',
 
-        const res = 
-        // await fetch(config.server_url+'rdf4j-server/repositories/1/namespaces/'+this.newNSprefix,
-        await fetch(config.fitlayout_server_url+'api/r/'+this.$route.params.repo+'/repository/namespaces/'+this.newNSprefix,
-        {
-          method: 'PUT',
-          headers:{
-            'Content-Type': 'text/plain'
-          },
-          body:this.newNSname  
-        }).then(
-          this.$toast.add({severity:'success', summary: 'Success creation', detail:'New namespaces created', life: 3000}),
-          this.tableData.data.push({
-            'prefix': this.newNSprefix,
-            'namespace': this.newNSname
-          }),
-          // clearing inputtext values
-          this.newNSname = '',
-          this.newNSprefix = '',
-
-        ).catch(error =>
-          this.$toast.add({severity:'error', summary: 'Error', detail:error, life: 3000})
-        )
-        
-        this.displayCreateModal = false;
-        this.prefixEmpty = false;
-        this.namespaceEmpty = false;
-        this.submittedDialog = false;
+          ).catch(error =>
+            this.$toast.add({severity:'error', summary: 'Error', detail:error, life: 3000})
+          )
+          
+          this.displayCreateModal = false;
+          this.prefixEmpty = false;
+          this.namespaceEmpty = false;
+          this.submittedDialog = false;
+        }
       } else {
         this.prefixEmpty =  this.newNSprefix !== '' ? false : true;
         if(!this.newNSname.match(/(http(s){0,1}:\/\/)\w+/g) && this.newNSname !== ''){
@@ -229,9 +232,12 @@ export default {
     },
     // function to close edit modal and execute update of the given namespace
     async closeEditModal() {
+
       this.submittedDialog = true;
-      // control if namespace is given
-      if(this.editedNSname !== '' && this.editedNSname.match(/(http(s){0,1}:\/\/)\w+/g)){
+      // control if namespace is given and already exists
+      let exists = this.tableData.data.some(item => item.namespace === this.editedNSname && item.prefix !== this.prefixEditNS);
+     
+      if(this.editedNSname !== '' && this.editedNSname.match(/(http(s){0,1}:\/\/)\w+/g) && !exists){
           const res =
           //  await fetch(config.server_url+'rdf4j-server/repositories/1/namespaces/'+this.prefixEditNS,
           await fetch(config.fitlayout_server_url+'api/r/'+this.$route.params.repo+'/repository/namespaces/'+this.prefixEditNS,
@@ -259,6 +265,8 @@ export default {
       } else {
         if(!this.editedNSname.match(/(http(s){0,1}:\/\/)\w+/g) && this.editedNSname !== ''){
           this.errorText = 'Not correct format of namespace.'
+        } else if(exists){
+          this.errorText = 'Namespace already exists.';
         } else {
           this.errorText = 'Namespace is required.';
         }
@@ -268,7 +276,7 @@ export default {
     },
     // function to query all namespaces of the given repository
     async queryAllNamespaces(){
-      this.data = await fetch(config.fitlayout_server_url
+      this.allNamespaces = await fetch(config.fitlayout_server_url
               +'api/r/'+this.$route.params.repo+'/repository/namespaces', {
           method: 'GET',
           headers: {
@@ -278,13 +286,11 @@ export default {
         .then(res => this.errorHandler(res))
         .catch((error) => console.log(error))
 
-      for (let index = 0; index < this.data.results.bindings.length; index++) {
+      for (let index = 0; index < this.allNamespaces.results.bindings.length; index++) {
         this.tableData.data.push({
-          'prefix': this.data.results.bindings[index].prefix.value,
-          'namespace': this.data.results.bindings[index].namespace.value
-          
-        })
-        
+          'prefix': this.allNamespaces.results.bindings[index].prefix.value,
+          'namespace': this.allNamespaces.results.bindings[index].namespace.value
+        })   
       }
     },
     async errorHandler(res){
