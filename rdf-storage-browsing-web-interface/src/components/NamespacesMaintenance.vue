@@ -7,11 +7,13 @@
       <div class="p-fluid">
           <div class="p-field">
               <label for="prefix">Prefix</label>
-              <InputText id="prefixC" type="text" v-model="newNSprefix"/>
+              <InputText id="prefixC" type="text" v-model="newNSprefix" :class="{'p-invalid': prefixEmpty && submittedDialog}"/>
+              <small v-show="prefixEmpty && submittedDialog" class="p-error">Prefix is required.</small>
           </div>
           <div class="p-field">
               <label for="namespace">Namespace</label>
-              <InputText id="namespaceC" type="text" v-model="newNSname"/>
+              <InputText id="namespaceC" type="text" v-model="newNSname" :class="{'p-invalid': namespaceEmpty && submittedDialog}"/>
+              <small v-show="namespaceEmpty && submittedDialog" class="p-error">Namespace is required.</small>
           </div>
       </div>
       <template #footer>
@@ -23,7 +25,8 @@
       <div class="p-fluid">
           <div class="p-field">
               <label for="namespace">New Namespace</label>
-              <InputText id="namespaceE" type="text" v-model="editedNSname"/>
+              <InputText id="namespaceE" type="text" v-model="editedNSname" :class="{'p-invalid': namespaceEmpty && submittedDialog}"/>
+              <small v-show="namespaceEmpty && submittedDialog" class="p-error">Namespace is required.</small>
           </div>
       </div>
       <template #footer>
@@ -42,7 +45,7 @@
                 <div class="p-col-fixed">
                   <Button @click="openCreateModal(position)" class="p-button-sm p-button-info size" v-tooltip.right="'Create new namespace'">
                     <i class="pi pi-plus"></i>
-                    </Button>
+                  </Button>
                 </div>
               </div>
         </div>  
@@ -56,12 +59,12 @@
                 <Column  field="namespace" header="Namespace"></Column>
                 <Column  header="Options"> 
                   <template #body="slotProps">
-                        <Button @click="confirmRemove(slotProps.data.prefix)" class="p-button-sm p-button-danger" v-tooltip.right="'Remove'">
-                          <i class="pi pi-trash"></i>
-                        </Button>
-                        <Button @click="openEditModal(position,slotProps.data.prefix)" class="p-button-sm margin-right p-button-warning" v-tooltip.right="'Edit'">
-                          <i class="pi pi-pencil"></i>
-                        </Button>
+                      <Button @click="confirmRemove(slotProps.data.prefix)" class="p-button-sm p-button-danger" v-tooltip.right="'Remove'">
+                        <i class="pi pi-trash"></i>
+                      </Button>
+                      <Button @click="openEditModal(position,slotProps.data.prefix)" class="p-button-sm margin-right p-button-warning" v-tooltip.right="'Edit'">
+                        <i class="pi pi-pencil"></i>
+                      </Button>
                   </template>
                 </Column>
             </DataTable>
@@ -117,7 +120,12 @@ export default {
       // prefix for which the namespace will be edited
       prefixEditNS:'',
       editedNSname:'',
-      loading: true
+      loading: true,
+      // if dialog was submitted
+      submittedDialog: false,
+      // if prefix/namespace input was not filled
+      prefixEmpty: false,
+      namespaceEmpty: false
     }
   },
   async mounted() {
@@ -174,6 +182,8 @@ export default {
     },
     // Function to close modal and create new namespace in repository
     async closeCreateModal() {
+      this.submittedDialog = true;
+      // control if needed input is given
       if(this.newNSname !== '' && this.newNSprefix !== ''){
         // TODO: Control if namespace/prefix already exists ???
         // TODO: Control if namespace/prefix correct format ???
@@ -202,36 +212,48 @@ export default {
         )
         
         this.displayCreateModal = false;
+        this.prefixEmpty = false;
+        this.namespaceEmpty = false;
+        this.submittedDialog = false;
+      } else {
+        this.prefixEmpty =  this.newNSprefix !== '' ? false : true;
+        this.namespaceEmpty = this.newNSname !== '' ? false : true;
       }
 
     },
     // function to close edit modal and execute update of the given namespace
     async closeEditModal() {
-      // TODO: Control if namespace is given???
-      if(this.prefixEditNS !== ''){
+      this.submittedDialog = true;
+      // control if namespace is given
+      if(this.editedNSname !== ''){
           const res =
           //  await fetch(config.server_url+'rdf4j-server/repositories/1/namespaces/'+this.prefixEditNS,
           await fetch(config.fitlayout_server_url+'api/r/'+this.$route.params.repo+'/repository/namespaces/'+this.prefixEditNS,
           {
-          method: 'PUT',
-          headers:{
-            'Content-Type': 'text/plain'
-          },
-          body:this.editedNSname 
-        }).then(
-          this.$toast.add({severity:'success', summary: 'Successful edit', detail:'Namespace successfully updated!', life: 3000}),
-          this.tableData.data[this.tableData.data.findIndex(item => item.prefix === this.prefixEditNS)].namespace = this.editedNSname,
+            method: 'PUT',
+            headers:{
+              'Content-Type': 'text/plain'
+            },
+            body:this.editedNSname 
+          }).then(
+            this.$toast.add({severity:'success', summary: 'Successful edit', detail:'Namespace successfully updated!', life: 3000}),
+            this.tableData.data[this.tableData.data.findIndex(item => item.prefix === this.prefixEditNS)].namespace = this.editedNSname,
 
-          // clearing input text values
-          this.prefixEditNS = '',
-          this.editedNSname = '',
+            // clearing input text values
+            this.prefixEditNS = '',
+            this.editedNSname = '',
 
-        ).catch(error =>
-          this.$toast.add({severity:'error', summary: 'Error', detail:error, life: 3000})
-        )
+          ).catch(error =>
+            this.$toast.add({severity:'error', summary: 'Error', detail:error, life: 3000})
+          )
+
+        this.namespaceEmpty = false;
+        this.submittedDialog = false;
+        this.displayEditModal = false;
+      } else {
+        this.namespaceEmpty = true;
       }
 
-      this.displayEditModal = false;
     },
     // function to query all namespaces of the given repository
     async queryAllNamespaces(){

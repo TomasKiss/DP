@@ -12,7 +12,7 @@
             </div>
         </div>  
         <div class="p-col-12">
-            <SavedQueries />
+            <SavedQueries/>
         </div>
     </div>
   </div>
