@@ -13,7 +13,7 @@
           <div class="p-field">
               <label for="namespace">Namespace</label>
               <InputText id="namespaceC" type="text" v-model="newNSname" :class="{'p-invalid': namespaceEmpty && submittedDialog}"/>
-              <small v-show="namespaceEmpty && submittedDialog" class="p-error">Namespace is required.</small>
+              <small v-show="namespaceEmpty && submittedDialog" class="p-error">{{errorText}}</small>
           </div>
       </div>
       <template #footer>
@@ -26,7 +26,7 @@
           <div class="p-field">
               <label for="namespace">New Namespace</label>
               <InputText id="namespaceE" type="text" v-model="editedNSname" :class="{'p-invalid': namespaceEmpty && submittedDialog}"/>
-              <small v-show="namespaceEmpty && submittedDialog" class="p-error">Namespace is required.</small>
+              <small v-show="namespaceEmpty && submittedDialog" class="p-error">{{errorText}}</small>
           </div>
       </div>
       <template #footer>
@@ -125,7 +125,8 @@ export default {
       submittedDialog: false,
       // if prefix/namespace input was not filled
       prefixEmpty: false,
-      namespaceEmpty: false
+      namespaceEmpty: false,
+      errorText: 'Namespace is required.'
     }
   },
   async mounted() {
@@ -184,7 +185,7 @@ export default {
     async closeCreateModal() {
       this.submittedDialog = true;
       // control if needed input is given
-      if(this.newNSname !== '' && this.newNSprefix !== ''){
+      if(this.newNSname !== '' && this.newNSprefix !== '' && this.newNSname.match(/(http(s){0,1}:\/\/)\w+/g)){
         // TODO: Control if namespace/prefix already exists ???
         // TODO: Control if namespace/prefix correct format ???
 
@@ -217,7 +218,12 @@ export default {
         this.submittedDialog = false;
       } else {
         this.prefixEmpty =  this.newNSprefix !== '' ? false : true;
-        this.namespaceEmpty = this.newNSname !== '' ? false : true;
+        if(!this.newNSname.match(/(http(s){0,1}:\/\/)\w+/g) && this.newNSname !== ''){
+          this.errorText = 'Not correct format of namespace.'
+        } else {
+          this.errorText = 'Namespace is required.';
+        }
+        this.namespaceEmpty = this.newNSname !== '' && this.newNSname.match(/(http(s){0,1}:\/\/)\w+/g) ? false : true;
       }
 
     },
@@ -225,7 +231,7 @@ export default {
     async closeEditModal() {
       this.submittedDialog = true;
       // control if namespace is given
-      if(this.editedNSname !== ''){
+      if(this.editedNSname !== '' && this.editedNSname.match(/(http(s){0,1}:\/\/)\w+/g)){
           const res =
           //  await fetch(config.server_url+'rdf4j-server/repositories/1/namespaces/'+this.prefixEditNS,
           await fetch(config.fitlayout_server_url+'api/r/'+this.$route.params.repo+'/repository/namespaces/'+this.prefixEditNS,
@@ -251,6 +257,11 @@ export default {
         this.submittedDialog = false;
         this.displayEditModal = false;
       } else {
+        if(!this.editedNSname.match(/(http(s){0,1}:\/\/)\w+/g) && this.editedNSname !== ''){
+          this.errorText = 'Not correct format of namespace.'
+        } else {
+          this.errorText = 'Namespace is required.';
+        }
         this.namespaceEmpty = true;
       }
 
