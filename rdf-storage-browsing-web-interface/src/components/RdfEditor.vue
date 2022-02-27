@@ -35,9 +35,9 @@
 
     </div>
     <div class="p-col-4">
+      <InputText id="name" v-model="queryName" type="text" class="p-inputtext-sm" placeholder="Save query as ..."/>
       <Button label="Save" @click="saveQueryToLocalStorage" class="p-button-sm p-button-secondary save_button_margin"
         v-tooltip.bottom="'Save new or edited query'"/>
-      <InputText id="name" v-model="queryName" type="text" class="p-inputtext-sm" placeholder="Save query as ..."/>
     </div>
   </div>
 </template>
@@ -210,13 +210,16 @@
           this.queryType = "ask";
         } else if(queryText.toLowerCase().includes("select")){
           this.queryType = "select";
-        } else {
+        } else if(queryText.toLowerCase().includes("update")){
           this.queryType = "update";
+        } else {
+          this.queryType = "empty";
+          this.$toast.add({severity:'error', summary: 'Error', detail:'Query was empty!', life: 3000});
         }
 
 
         let answerToQuery;
-        if(this.valid){
+        if(this.valid && this.queryType !== "empty"){
           // emit that the fetching of data started, so show spinner
           this.$emit('loadingResult', true);
           // CORS headers (filter) have to set in tomcat 9 web.xml file 
@@ -505,7 +508,7 @@
 
   .under_editor_space{
     text-align:center;
-    margin-top:10px;
+    margin-top:5px !important;
   }
 
   .save_button_margin{
