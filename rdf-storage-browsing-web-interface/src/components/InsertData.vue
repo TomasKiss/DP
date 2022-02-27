@@ -1,46 +1,49 @@
 <template>
     <Toast />
-    <div class="p-grid p-flex-column main">
-        <div class="p-col-12">
-            <h1>Insert new data to repository</h1>
-        </div>
-        <div class="p-col-12 leftText">
-            <h5 class="leftText">Upload data format</h5>
-            <Dropdown v-model="selectedFormat" :options="formats" optionLabel="name" optionValue="code" placeholder="Select a Format"/>
-        </div>
-        <div class="p-col-12">
-           <h3 class="leftText">Upload from URL</h3>
-            <span class="leftText" >
-                <InputText id="url" type="text" v-model="url" class="p-inputtext p-component" placeholder="URL"/>
-                <!-- <label for="url" class="">URL</label> -->
-            </span>
-        </div>
-        <div class="p-col-12">
-           <h3 class="leftText">Upload from File</h3>     
-            <FileUpload 
-                name="demo[]"
-                v-model="file" 
-                url="" @select="onSelect" 
-                :multiple="false" accept="" :showUploadButton="false"
-                :auto="false"
-                :customUpload="true"
-                :fileLimit="1"
-            >
-                <template #empty>
-                    <p>Drag and drop files to here to upload.</p>
-                </template>
-            </FileUpload>
-        </div>
-        <div class="p-col-12">
-            <h3 class="leftText">Upload data as text</h3>
+    <div class="main">
+        <div class="p-grid p-flex-column">
+            <div class="p-col-12">
+                <h1>Insert new data to repository</h1>
+            </div>
+            <div class="p-col-12 leftText">
+                <h5 class="leftText">Upload data format</h5>
+                <Dropdown v-model="selectedFormat" :options="formats" optionLabel="name" optionValue="code" placeholder="Select a Format"/>
+            </div>
+            <div class="p-col-12">
+            <h3 class="leftText">Upload from URL</h3>
+                <span class="leftText" >
+                    <InputText id="url" type="text" v-model="url" class="p-inputtext p-component" placeholder="URL"/>
+                    <!-- <label for="url" class="">URL</label> -->
+                </span>
+            </div>
+            <div class="p-col-12">
+            <h3 class="leftText">Upload from File</h3>     
+                <FileUpload 
+                    name="demo[]"
+                    v-model="file" 
+                    url="" 
+                    @select="onSelect"
+                    @clear="onCancel" 
+                    :multiple="false" accept="" :showUploadButton="false"
+                    :auto="false"
+                    :customUpload="true"
+                    :fileLimit="1"
+                >
+                    <template #empty>
+                        <p>Drag and drop files to here to upload.</p>
+                    </template>
+                </FileUpload>
+            </div>
+            <div class="p-col-12">
+                <h3 class="leftText">Upload data as text</h3>
 
-            <Textarea v-model="textData" :autoResize="true" rows="5" cols="80" placeholder="Data in text format"/>
-        </div>    
-        <div class="p-col-12 uploadData">
-            <Button @click="uploadData" icon="pi pi-upload" iconPos="left" label="Upload" class="p-button-sm"/>
+                <Textarea v-model="textData" :autoResize="true" rows="5" cols="80" placeholder="Data in text format"/>
+            </div>    
+            <div class="p-col-12 uploadData">
+                <Button @click="uploadData" icon="pi pi-upload" iconPos="left" label="Upload" class="p-button-sm"/>
+            </div>
         </div>
     </div>
-
 </template>
 
 <script>
@@ -85,6 +88,11 @@ export default {
             this.file = event.files;
         },
 
+        // if file upload is canceled by user
+        onCancel() {
+            this.file = "";
+        },
+        
         // control if the all needed information is given by user and perform the upload
         async uploadData() {
             if(this.selectedFormat == ""){

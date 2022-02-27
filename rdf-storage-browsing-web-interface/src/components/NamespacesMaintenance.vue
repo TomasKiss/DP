@@ -152,7 +152,7 @@ export default {
       });
     },
     // removal of namespace after confirmation
-    async onConfirmRemove(prefixToRemove) {
+    async onConfirmRemove(prefixToRemove){
       const res = 
       // await fetch(config.server_url+'rdf4j-server/repositories/1/namespaces/'+prefixToRemove,
       await fetch(config.fitlayout_server_url+'api/r/'+this.$route.params.repo+'/repository/namespaces/'+prefixToRemove,
@@ -170,19 +170,19 @@ export default {
     
     },
     // opening and positioning modal for namespace creation
-    openCreateModal(position) {
+    openCreateModal(position){
       this.position = position;
       this.displayCreateModal = true;
     },
     // opening and positioning modal for namespace edition
-    openEditModal(position,prefix) {
+    openEditModal(position,prefix){
       this.position = position;
       this.prefixEditNS = prefix;
       this.editedNSname = this.tableData.data[this.tableData.data.findIndex(item => item.prefix === this.prefixEditNS)].namespace;
       this.displayEditModal = true;
     },
     // Function to close modal and create new namespace in repository
-    async closeCreateModal() {
+    async closeCreateModal(){
       this.submittedDialog = true;
       // control if needed input is given and if namespace has correct format
       if(this.newNSname !== '' && this.newNSprefix !== '' && this.newNSname.match(/(http(s){0,1}:\/\/)\w+/g)){
@@ -231,7 +231,7 @@ export default {
 
     },
     // function to close edit modal and execute update of the given namespace
-    async closeEditModal() {
+    async closeEditModal(){
 
       this.submittedDialog = true;
       // control if namespace is given and already exists
