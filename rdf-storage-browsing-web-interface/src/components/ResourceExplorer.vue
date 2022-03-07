@@ -108,7 +108,7 @@ import TabPanel from 'primevue/tabpanel';
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
 import Button from 'primevue/button';
-import { config } from '../../config';
+let config = require('../config.js');
 import {FilterMatchMode,FilterOperator} from 'primevue/api';
 import InputText from 'primevue/inputtext';
 import Toast from 'primevue/toast';
@@ -172,7 +172,7 @@ export default {
          //    },
          // })
 
-         let data = await fetch(config.fitlayout_server_url
+         let data = await fetch(config.config.server_url
               +'api/r/'+this.$route.params.repo+'/repository/query', {
             method: 'POST',
             headers: {
@@ -184,7 +184,6 @@ export default {
          })
          .then(res =>  {
             if (!res.ok) {
-               console.log("No data found for: ", resource);
                // show toast about no data found for the resource
                this.$toast.add({severity:'error', summary: 'Error', detail:`No data found for resource:\n ${resource} !`, life: 3000});
             } else {

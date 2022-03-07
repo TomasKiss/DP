@@ -172,7 +172,6 @@ export default {
                   this.computedResult.push(answers);
                 }
             });
-            console.log("new CONSTRUCT result: ",this.columns, this.computedResult);
       },
       
       // parse the content of the select query response
@@ -213,7 +212,6 @@ export default {
           // store row data
           this.computedResult.push(answers);
         })
-        console.log("new SELECT result: ",this.columns, this.computedResult);
       }
     }
 }

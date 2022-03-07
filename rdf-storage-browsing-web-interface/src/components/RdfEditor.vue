@@ -70,7 +70,7 @@
   // Sparql parser to validate query
   import Sparqljs from 'sparqljs';
 
-  import { config } from '../../config';
+  let config = require('../config.js');
   
   export default {
     name:'RdfEditor',
@@ -167,7 +167,7 @@
 
       // fetching all namespaces present in the repository
       async queryAllNamespaces(){
-        const data = await fetch(config.fitlayout_server_url
+        const data = await fetch(config.config.server_url
               +'api/r/'+this.$route.params.repo+'/repository/namespaces', {
             method: 'GET',
             headers: {
@@ -229,9 +229,7 @@
           //   headers: {
           //     'Accept':'application/json',
           //   },
-          console.log(queryText);
-
-          let sendQueryToUrl = config.fitlayout_server_url+'api/r/'+this.$route.params.repo;
+          let sendQueryToUrl = config.config.server_url+'api/r/'+this.$route.params.repo;
           // change the URL end based on the type of query
           if(this.queryType == "update"){
             sendQueryToUrl = sendQueryToUrl + '/repository/updateQuery';
@@ -257,9 +255,6 @@
 
           // emit that the fetching of data ended, so hide spinner
           this.$emit('loadingResult', false);
-
-
-          console.log(answerToQuery);
 
           // emit answer if everything was OK and data was found
           if((this.queryType == "ask" && 'boolean' in answerToQuery) || 

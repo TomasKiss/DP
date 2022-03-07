@@ -54,7 +54,7 @@ import Button from 'primevue/button';
 import Dropdown from 'primevue/dropdown';
 import Textarea from 'primevue/textarea';
 
-import { config } from '../../config';
+let config = require('../config.js');
 
 export default {
     name: 'InsertData',
@@ -84,7 +84,6 @@ export default {
     methods: {
         // if file upload is selected by user
         onSelect(event) {
-            console.log(event.files);
             this.file = event.files;
         },
 
@@ -123,7 +122,7 @@ export default {
             } else if (this.url == "" && this.file != "" && this.textData == ""){
                 // Data update from File
                 // await fetch(config.server_url+'rdf4j-server/repositories/2/statements', 
-                await fetch(config.fitlayout_server_url+'api/r/'+this.$route.params.repo+'/repository/statements', 
+                await fetch(config.config.server_url+'api/r/'+this.$route.params.repo+'/repository/statements', 
                 {
                     method: 'POST',
                     headers: {
@@ -141,7 +140,7 @@ export default {
             } else if (this.url == "" && this.file == "" && this.textData != ""){
                 // Data update from Textarea
                 // await fetch(config.server_url+'rdf4j-server/repositories/2/statements', 
-                await fetch(config.fitlayout_server_url+'api/r/'+this.$route.params.repo+'/repository/statements', 
+                await fetch(config.config.server_url+'api/r/'+this.$route.params.repo+'/repository/statements', 
                 {
                     method: 'POST',
                     headers: {
@@ -169,7 +168,6 @@ export default {
             } else {
                 this.$toast.add({severity:'error', summary: 'Error', detail:error, life: 3000});
             } 
-            console.log(res);     
         },
     }
 }

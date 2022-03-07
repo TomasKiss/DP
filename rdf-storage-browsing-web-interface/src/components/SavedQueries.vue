@@ -87,7 +87,6 @@ export default {
         },
         // open toast to confirm removal of namespace
         confirmRemove(queryName){
-            // this.$toast.add({severity: 'warn', name: queryName, group: 'bc'});
             this.$confirm.require({
                 message: 'Are you sure you want to remove this saved query??',
                 header: 'Delete Confirmation',
@@ -104,7 +103,6 @@ export default {
         // removal of query after confirmation
         onConfirmRemove(queryName) {
             this.deleteQuery(queryName);
-            // this.$toast.removeGroup('bc');
         },
         // delete the chosen query from local storage
         deleteQuery(queryName){
