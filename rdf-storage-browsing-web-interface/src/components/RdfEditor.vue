@@ -167,8 +167,7 @@
 
       // fetching all namespaces present in the repository
       async queryAllNamespaces(){
-        const data = await fetch(config.config.server_url
-              +'api/r/'+this.$route.params.repo+'/repository/namespaces', {
+        const data = await fetch('http://localhost:8088/rdf4j-server/repositories/'+this.$route.params.repo+'/namespaces', {
             method: 'GET',
             headers: {
               'Accept':'application/json',
@@ -223,26 +222,25 @@
           // emit that the fetching of data started, so show spinner
           this.$emit('loadingResult', true);
           // CORS headers (filter) have to set in tomcat 9 web.xml file 
-          // answerToQuery = await fetch(config.server_url
-          //     +'rdf4j-server/repositories/'+this.$route.params.repo+'?query='+encodeURIComponent(queryText), {
-          //   method: 'GET',
-          //   headers: {
-          //     'Accept':'application/json',
-          //   },
-          let sendQueryToUrl = config.config.server_url+'api/r/'+this.$route.params.repo;
-          // change the URL end based on the type of query
-          if(this.queryType == "update"){
-            sendQueryToUrl = sendQueryToUrl + '/repository/updateQuery';
-          } else {
-            sendQueryToUrl = sendQueryToUrl + '/repository/query';
-          }
-
-          answerToQuery = await fetch(sendQueryToUrl, {
-            method: 'POST',
+          answerToQuery = await fetch('http://localhost:8088/rdf4j-server/repositories/'+this.$route.params.repo+'?query='+encodeURIComponent(queryText), {
+            method: 'GET',
             headers: {
-              'Content-Type':'application/sparql-query'
+              'Accept':'application/json',
             },
-            body: queryText,
+          // let sendQueryToUrl = config.config.server_url+'api/r/'+this.$route.params.repo;
+          // // change the URL end based on the type of query
+          // if(this.queryType == "update"){
+          //   sendQueryToUrl = sendQueryToUrl + '/repository/updateQuery';
+          // } else {
+          //   sendQueryToUrl = sendQueryToUrl + '/repository/query';
+          // }
+
+          // answerToQuery = await fetch(sendQueryToUrl, {
+          //   method: 'POST',
+          //   headers: {
+          //     'Content-Type':'application/sparql-query'
+          //   },
+          //   body: queryText,
 
           })
           .then(res =>

@@ -122,7 +122,7 @@ export default {
             } else if (this.url == "" && this.file != "" && this.textData == ""){
                 // Data update from File
                 // await fetch(config.server_url+'rdf4j-server/repositories/2/statements', 
-                await fetch(config.config.server_url+'api/r/'+this.$route.params.repo+'/repository/statements', 
+                await fetch('http://localhost:8088/rdf4j-server/repositories/'+this.$route.params.repo+'/statements', 
                 {
                     method: 'POST',
                     headers: {
@@ -140,7 +140,7 @@ export default {
             } else if (this.url == "" && this.file == "" && this.textData != ""){
                 // Data update from Textarea
                 // await fetch(config.server_url+'rdf4j-server/repositories/2/statements', 
-                await fetch(config.config.server_url+'api/r/'+this.$route.params.repo+'/repository/statements', 
+                await fetch('http://localhost:8088/rdf4j-server/repositories/'+this.$route.params.repo+'/statements', 
                 {
                     method: 'POST',
                     headers: {

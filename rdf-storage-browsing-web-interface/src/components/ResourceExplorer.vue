@@ -165,23 +165,23 @@ export default {
          // create query 
          let queryText = this.createQuery(resource);   
 
-         // let data = await fetch(config.server_url+'rdf4j-server/repositories/'+this.$route.params.repo+'?query='+encodeURIComponent(queryText), {
-         //    method: 'GET',
-         //    headers: {
-         //      'Accept':'application/json',
-         //    },
-         // })
-
-         let data = await fetch(config.config.server_url
-              +'api/r/'+this.$route.params.repo+'/repository/query', {
-            method: 'POST',
+         let data = await fetch('http://localhost:8088/rdf4j-server/repositories/'+this.$route.params.repo+'?query='+encodeURIComponent(queryText), {
+            method: 'GET',
             headers: {
-            //   'Accept':'application/json',
-              'Content-Type':'application/sparql-query'
+              'Accept':'application/json',
             },
-            body: queryText,
-
          })
+
+         // let data = await fetch(config.config.server_url
+         //      +'api/r/'+this.$route.params.repo+'/repository/query', {
+         //    method: 'POST',
+         //    headers: {
+         //    //   'Accept':'application/json',
+         //      'Content-Type':'application/sparql-query'
+         //    },
+         //    body: queryText,
+
+         // })
          .then(res =>  {
             if (!res.ok) {
                // show toast about no data found for the resource
