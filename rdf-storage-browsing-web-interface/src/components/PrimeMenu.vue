@@ -10,49 +10,40 @@
 </template>
 
 <script>
-  import Menubar from 'primevue/menubar';
-  import InputText from 'primevue/inputtext'
+import Menubar from 'primevue/menubar';
+import InputText from 'primevue/inputtext'
 
 export default {
-    name: "PrimeMenu",
-    components:{
-        Menubar,
-        InputText
-    },
-    data() {
-      return {
-        items:[
-            // {
-            //   label: 'Repositories',
-            //   icon: 'pi pi-folder',
-            //   to:{name: 'Repositories'}        
-            // },
-            {
-              label: 'Editor',
-              icon: 'pi pi-pencil',
-              to:{name: 'Home'}      
-            },
-            {
-              label: 'Prefix declarations',
-              icon: 'pi pi-list',
-              to:{name: 'Namespaces'}      
-            },
-            {
-              label: 'Saved queries',
-              icon: 'pi pi-question-circle',
-              to:{name: 'SavedQueriesPage'}      
-            },
-            {
-              label: 'Insert data',
-              icon: 'pi pi-upload',
-              to:{name: 'InsertDataPage'}      
-            },
-        ],
-      }
-    },
+  name: "PrimeMenu",
+  components:{
+      Menubar,
+      InputText
+  },
+  data() {
+    return {
+      items:[
+        {
+          label: 'Editor',
+          icon: 'pi pi-pencil',
+          to:{name: 'Home'}      
+        },
+        {
+          label: 'Prefix declarations',
+          icon: 'pi pi-list',
+          to:{name: 'NamespacesPage'}      
+        },
+        {
+          label: 'Saved queries',
+          icon: 'pi pi-question-circle',
+          to:{name: 'SavedQueriesPage'}      
+        },
+        {
+          label: 'Insert data',
+          icon: 'pi pi-upload',
+          to:{name: 'InsertDataPage'}      
+        },
+      ],
+    }
+  },
 }
 </script>
-
-<style>
-
-</style>

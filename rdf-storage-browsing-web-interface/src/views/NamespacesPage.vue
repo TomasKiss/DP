@@ -1,22 +1,22 @@
 <template>
-  <div class="home">
+  <div class="namespaces">
     <div class="">
       <PrimeMenu/>
     </div>
-    <MainComponent/>
+    <NamespacesMaintenance/>
   </div>
 </template>
 
 <script>
 // @ is an alias to /src
 import PrimeMenu from "@/components/PrimeMenu.vue";
-import MainComponent from "@/components/MainComponent.vue";
+import NamespacesMaintenance from "@/components/NamespacesMaintenance.vue";
 
 export default {
-  name: 'Home',
+  name: 'NamespacesPage',
   components: {
     PrimeMenu,
-    MainComponent
+    NamespacesMaintenance
   },
   data() {
     return {
@@ -26,9 +26,3 @@ export default {
 
 }
 </script>
-
-<style>
-.main{
-  margin: 0 10vw;
-}
-</style>

@@ -1,10 +1,10 @@
 <template>
   <Toast />
-  <!-- TODO: height setting -->
+
   <div class="p-col text_left">
     <h1>Editor</h1>
   </div>
-  <table class="common_bgc" style="width:100%; border: 2px solid black; min-height:20vh;">
+  <table class="common_bgc editor_table">
     <tr>
       <th class="text_left padding_set" v-if="htmlCode.length">
         Namespaces:
@@ -20,44 +20,45 @@
         <prism-editor class="my-editor" v-model="code" :highlight="highlighter" line-numbers></prism-editor>
       </td>
       <td>
-        <tr v-for="i in newRowsCount" :key="i" :id="i-oldRowsCount+1" style="visibility: hidden">
+        <tr v-for="i in newRowsCount" :key="i" :id="i-oldRowsCount+1" class="hidden_tr">
           <td v-tooltip.right="errorText" class="">
-            <i style="color:red" class="pi pi-times-circle"></i>
+            <i class="pi pi-times-circle red_text"></i>
           </td>
         </tr>
       </td>
     </tr>
   </table>
-  <div style="text-align:center;margin-top:10px;" class="p-grid ">
+  <div class="p-grid under_editor_space">
     <div class="p-col-4 p-offset-4">
       <Button @click="queryData" label="Execute" class="p-button-sm" 
-      v-tooltip.bottom="'Execute the query'" />
+      v-tooltip.bottom="'Execute the query'"/>
 
     </div>
     <div class="p-col-4">
-      <Button label="Save" @click="saveQueryToLocalStorage" class="p-button-sm p-button-secondary" style="margin-right: 10px"
-        v-tooltip.bottom="'Save new or edited query'"/>
       <InputText id="name" v-model="queryName" type="text" class="p-inputtext-sm" placeholder="Save query as ..."/>
+      <Button label="Save" @click="saveQueryToLocalStorage" class="p-button-sm p-button-secondary save_button_margin"
+        v-tooltip.bottom="'Save new or edited query'"/>
     </div>
-
   </div>
 </template>
 
 <script>
   // import Prism Editor
   import { PrismEditor } from 'vue-prism-editor';
-  import 'vue-prism-editor/dist/prismeditor.min.css'; // import the styles somewhere
+  // import the styles for vue-prism-editor 
+  import 'vue-prism-editor/dist/prismeditor.min.css';
   
   // import highlighting library (you can use any library you want just return html string)
   import { highlight, languages } from 'prismjs/components/prism-core';
   import 'prismjs/components/prism-clike';
   import 'prismjs/components/prism-javascript';
-  // !!!!!!!!!!!!!!!!!!!!! turtle was needed as dependency
+  // turtle was needed as dependency
   import 'prismjs/components/prism-turtle'; 
   import 'prismjs/components/prism-sparql'; 
 
-  // Theme for the editor
-  import 'prismjs/themes/prism.css'; // import syntax highlighting styles
+  // theme for the editor
+  // import syntax highlighting styles
+  import 'prismjs/themes/prism.css';
 
   // PrimeVue components
   import Button from 'primevue/button';
@@ -67,18 +68,18 @@
   import InputText from 'primevue/inputtext';
 
   // Sparql parser to validate query
-  import Sparqljs from 'sparqljs'
+  import Sparqljs from 'sparqljs';
 
-  import { config } from '../../config';
+  let config = require('../config.js');
   
   export default {
-    name:'VueEditor',
+    name:'RdfEditor',
     components: {
       PrismEditor,
       Button,
       Toast,
       Textarea,
-      InputText,
+      InputText
     },
     emits: ['resultReturn','loadingResult'],
     directives: {
@@ -101,7 +102,7 @@
       errorText: ' ',
       // parser used for query validation
       parser: new Sparqljs.Parser(),
-      // already added prefixes TODO: find better word
+      // already added prefixes
       alreadyAddedPrefs:[],
       // prefix declarations to prepend to the query
       prefixTextDeclarations: [],
@@ -110,7 +111,7 @@
       // name of the query to be saved
       queryName: "",
       // local storage array for storing queries
-      storedQueries: [],
+      storedQueries: []
     }),
     mounted() {
       // initial query off all namespaces from the repository
@@ -126,7 +127,7 @@
         localStorage.setItem('storedQueries', parsed);
       }
 
-      // Redirect from "SavedQueriesPage"
+      // redirect from "SavedQueriesPage"
       if(this.$route.params.do != "" && this.$route.params.name ){
           this.queryName = this.$route.params.name;
           this.$router.replace({params: { name: undefined, do: undefined}}); 
@@ -158,14 +159,15 @@
         })
 
         // 
-        let highlightedCode = highlight(code, languages.sparql); // languages.<insert language> to return html with markup 
+        // languages.<insert language> to return html with markup 
+        let highlightedCode = highlight(code, languages.sparql); 
 
         return highlightedCode;
       },
 
       // fetching all namespaces present in the repository
       async queryAllNamespaces(){
-        const data = await fetch(config.fitlayout_server_url
+        const data = await fetch(config.config.server_url
               +'api/r/'+this.$route.params.repo+'/repository/namespaces', {
             method: 'GET',
             headers: {
@@ -175,7 +177,7 @@
           .then(res =>  {
             if(!res.ok){
               this.$toast.add({severity:'error', summary: 'Error', detail:"Error happened during fetch of all namespaces!"});
-            } else { return res.json() }
+            } else { return res.json(); }
           })
           .catch((error) => console.log(error))
 
@@ -208,13 +210,16 @@
           this.queryType = "ask";
         } else if(queryText.toLowerCase().includes("select")){
           this.queryType = "select";
-        } else {
+        } else if(queryText.toLowerCase().includes("update")){
           this.queryType = "update";
+        } else {
+          this.queryType = "empty";
+          this.$toast.add({severity:'error', summary: 'Error', detail:'Query was empty!', life: 3000});
         }
 
 
         let answerToQuery;
-        if(this.valid){
+        if(this.valid && this.queryType !== "empty"){
           // emit that the fetching of data started, so show spinner
           this.$emit('loadingResult', true);
           // CORS headers (filter) have to set in tomcat 9 web.xml file 
@@ -224,9 +229,7 @@
           //   headers: {
           //     'Accept':'application/json',
           //   },
-          console.log(queryText);
-
-          let sendQueryToUrl = config.fitlayout_server_url+'api/r/'+this.$route.params.repo;
+          let sendQueryToUrl = config.config.server_url+'api/r/'+this.$route.params.repo;
           // change the URL end based on the type of query
           if(this.queryType == "update"){
             sendQueryToUrl = sendQueryToUrl + '/repository/updateQuery';
@@ -252,9 +255,6 @@
 
           // emit that the fetching of data ended, so hide spinner
           this.$emit('loadingResult', false);
-
-
-          console.log(answerToQuery);
 
           // emit answer if everything was OK and data was found
           if((this.queryType == "ask" && 'boolean' in answerToQuery) || 
@@ -394,22 +394,19 @@
       setPrefixDeclarationsTdInnerHtml(){
         // wait until DOM is re-rendered
         this.$nextTick(()=>{
-         
           if(this.htmlCode.length>0){
             // set the inner HTML of the td = show the namespace with prefix to the user
             this.htmlCode.forEach((e,i) => {
               document.getElementById('td-'+(i)).innerHTML = e.code;
             });
           }
-        }
-      )
+        })
       },
 
       // save user specified query to local storage
       saveQueryToLocalStorage(){
 
         if(this.queryName.length > 0 && this.code.length > 0){
-          //TODO: have to control if the name is already in use ?   
           const findIdx = this.storedQueries.findIndex(item => item.name == this.queryName);
           if(findIdx >= 0){
             // the query is already stored -> update body
@@ -422,7 +419,6 @@
 
           const parsed = JSON.stringify(this.storedQueries);
           localStorage.setItem('storedQueries', parsed);
-
 
           this.$toast.add({severity:'success', summary: 'Success Message', detail:`Query "${this.queryName}" was successfully saved!`, life: 3000});
         } else {
@@ -438,19 +434,14 @@
 
         }
       },
-
     },
   };
 </script>
 
 <style>
-  /* required class */
-  .my-editor {
-    /* we don't use `language-` classes anymore so thats why we need to add background and text color manually */
+  /* required class for vue-prism-editor*/
+  .my-editor{
     background: #f5f2f0;
-    /* color: #5faac9; */
-
-    /* you must provide font-family font-size line-height. Example: */
     font-family: Fira code, Fira Mono, Consolas, Menlo, Courier, monospace;
     font-size: 14px;
     line-height: 1.5;
@@ -458,8 +449,6 @@
     position: absolute;
     left: 0;
     top: 0;
-    /* padding-top:35px; */
-    /* min-height:20vh; */
   }
 
   .common_bgc{
@@ -474,7 +463,7 @@
   }
 
   /* optional class for removing the outline */
-  .prism-editor__textarea:focus {
+  .prism-editor__textarea:focus{
     outline: none;
   }
 
@@ -496,5 +485,28 @@
     font-family: Fira code, Fira Mono, Consolas, Menlo, Courier, monospace;
     font-size: 14px;
     line-height: 1.5;
+  }
+
+  .editor_table{
+    width:100%; 
+    border: 2px solid black; 
+    min-height:20vh;
+  }
+
+  .hidden_tr{
+    visibility: hidden;
+  }
+
+  .red_text{
+    color:red;
+  }
+
+  .under_editor_space{
+    text-align:center;
+    margin-top:5px !important;
+  }
+
+  .save_button_margin{
+    margin-right: 10px;
   }
 </style>

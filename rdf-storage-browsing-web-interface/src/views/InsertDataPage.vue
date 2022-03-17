@@ -13,8 +13,8 @@
 </template>
 
 <script>
-import InsertData from "@/components/InsertData.vue"
-import PrimeMenu from "@/components/PrimeMenu.vue"
+import InsertData from "@/components/InsertData.vue";
+import PrimeMenu from "@/components/PrimeMenu.vue";
 
 export default {
     name: "InsertDataPage",
@@ -29,7 +29,3 @@ export default {
     },
 }
 </script>
-
-<style>
-
-</style>
