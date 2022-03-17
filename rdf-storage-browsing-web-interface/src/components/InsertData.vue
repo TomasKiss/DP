@@ -1,46 +1,49 @@
 <template>
     <Toast />
-    <div class="p-grid p-flex-column main">
-        <div class="p-col-12">
-            <h1>Insert new data to repository</h1>
-        </div>
-        <div class="p-col-12 leftText">
-            <h5 class="leftText">Upload data format</h5>
-            <Dropdown v-model="selectedFormat" :options="formats" optionLabel="name" optionValue="code" placeholder="Select a Format" />
-        </div>
-        <div class="p-col-12">
-           <h3 class="leftText">Upload from URL</h3>
-            <span class="leftText" style="" >
-                <InputText id="url" type="text" v-model="url" class="p-inputtext p-component" placeholder="URL"/>
-                <!-- <label for="url" class="">URL</label> -->
-            </span>
-        </div>
-        <div class="p-col-12">
-           <h3 class="leftText">Upload from File</h3>     
-            <FileUpload 
-                name="demo[]"
-                v-model="file" 
-                url="" @select="onSelect" 
-                :multiple="false" accept="" :showUploadButton="false"
-                :auto="false"
-                :customUpload="true"
-                :fileLimit="1"
-            >
-                <template #empty>
-                    <p>Drag and drop files to here to upload.</p>
-                </template>
-            </FileUpload>
-        </div>
-        <div class="p-col-12">
-            <h3 class="leftText">Upload data as text</h3>
+    <div class="main">
+        <div class="p-grid p-flex-column">
+            <div class="p-col-12">
+                <h1>Insert new data to repository</h1>
+            </div>
+            <div class="p-col-12 leftText">
+                <h5 class="leftText">Upload data format</h5>
+                <Dropdown v-model="selectedFormat" :options="formats" optionLabel="name" optionValue="code" placeholder="Select a Format"/>
+            </div>
+            <div class="p-col-12">
+            <h3 class="leftText">Upload from URL</h3>
+                <span class="leftText" >
+                    <InputText id="url" type="text" v-model="url" class="p-inputtext p-component" placeholder="URL"/>
+                    <!-- <label for="url" class="">URL</label> -->
+                </span>
+            </div>
+            <div class="p-col-12">
+            <h3 class="leftText">Upload from File</h3>     
+                <FileUpload 
+                    name="demo[]"
+                    v-model="file" 
+                    url="" 
+                    @select="onSelect"
+                    @clear="onCancel" 
+                    :multiple="false" accept="" :showUploadButton="false"
+                    :auto="false"
+                    :customUpload="true"
+                    :fileLimit="1"
+                >
+                    <template #empty>
+                        <p>Drag and drop files to here to upload.</p>
+                    </template>
+                </FileUpload>
+            </div>
+            <div class="p-col-12">
+                <h3 class="leftText">Upload data as text</h3>
 
-            <Textarea v-model="textData" :autoResize="true" rows="5" cols="80" placeholder="Data in text format"/>
-        </div>    
-        <div class="p-col-12" style="text-align:center;margin-top:10px;">
-            <Button @click="uploadData" icon="pi pi-upload" iconPos="left" label="Upload" class="p-button-sm" />
+                <Textarea v-model="textData" :autoResize="true" rows="5" cols="80" placeholder="Data in text format"/>
+            </div>    
+            <div class="p-col-12 uploadData">
+                <Button @click="uploadData" icon="pi pi-upload" iconPos="left" label="Upload" class="p-button-sm"/>
+            </div>
         </div>
     </div>
-
 </template>
 
 <script>
@@ -51,8 +54,7 @@ import Button from 'primevue/button';
 import Dropdown from 'primevue/dropdown';
 import Textarea from 'primevue/textarea';
 
-
-import { config } from '../../config';
+let config = require('../config.js');
 
 export default {
     name: 'InsertData',
@@ -75,8 +77,6 @@ export default {
                 {name: 'RDF/XML', code: 'application/rdf+xml'},
                 {name: 'N-Triples', code: 'application/n-triples'},
                 {name: 'N-Quads', code: 'application/n-quads'},
-                // {name: 'RDF/JSON', code: 'application/rdf+json'},
-
             ],
             textData: "",
         }
@@ -84,10 +84,14 @@ export default {
     methods: {
         // if file upload is selected by user
         onSelect(event) {
-            console.log(event.files)
-            this.file = event.files
+            this.file = event.files;
         },
 
+        // if file upload is canceled by user
+        onCancel() {
+            this.file = "";
+        },
+        
         // control if the all needed information is given by user and perform the upload
         async uploadData() {
             if(this.selectedFormat == ""){
@@ -111,14 +115,14 @@ export default {
                     this.controlResponse(res, "URL");
                 })
                 .catch(error => 
-                    this.$toast.add({severity:'error', summary: 'Error', detail:error, life: 3000}),
+                    this.$toast.add({severity:'error', summary: 'Error', detail:error, life: 3000})
                 )
 
 
             } else if (this.url == "" && this.file != "" && this.textData == ""){
                 // Data update from File
                 // await fetch(config.server_url+'rdf4j-server/repositories/2/statements', 
-                await fetch(config.fitlayout_server_url+'api/r/'+this.$route.params.repo+'/repository/statements', 
+                await fetch(config.config.server_url+'api/r/'+this.$route.params.repo+'/repository/statements', 
                 {
                     method: 'POST',
                     headers: {
@@ -136,7 +140,7 @@ export default {
             } else if (this.url == "" && this.file == "" && this.textData != ""){
                 // Data update from Textarea
                 // await fetch(config.server_url+'rdf4j-server/repositories/2/statements', 
-                await fetch(config.fitlayout_server_url+'api/r/'+this.$route.params.repo+'/repository/statements', 
+                await fetch(config.config.server_url+'api/r/'+this.$route.params.repo+'/repository/statements', 
                 {
                     method: 'POST',
                     headers: {
@@ -164,7 +168,6 @@ export default {
             } else {
                 this.$toast.add({severity:'error', summary: 'Error', detail:error, life: 3000});
             } 
-            console.log(res);     
         },
     }
 }
@@ -175,6 +178,12 @@ export default {
     text-align: left;
 }
 
+.uploadData {
+    text-align:center;
+    margin-top:10px;
+}
+
+/* classes from PrimeVue */
 .p-float-label>input:focus~label, .p-float-label>input.p-state-filled~label, 
 .p-float-label>.p-inputwrapper-focus~label, .p-float-label>.p-inputwrapper-filled~label 
 { top: -.75em; font-size: 12px; }

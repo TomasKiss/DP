@@ -11,7 +11,7 @@ import PostCSS from "rollup-plugin-postcss";
 import { terser } from "rollup-plugin-terser";
 import minimist from "minimist";
 import modify from "rollup-plugin-modify";
-import copy from "rollup-plugin-copy-assets";
+import copy from "rollup-plugin-copy";
 import css from "rollup-plugin-css-only";
 
 // Get browserslist config and remove ie from es build targets
@@ -99,13 +99,18 @@ if (!argv.format || argv.format === "es") {
       exports: "named",
     },
     plugins: [
+      modify({
+        "require('../assets/hourglass.gif')":
+          "require('./assets/hourglass.gif')",
+        "require('../config.js')": "require('./config.js')",
+      }),
       replace(baseConfig.plugins.replace),
       ...baseConfig.plugins.preVue,
-      css({ output: "bundle.css" }),
+      css({ output: "style.css" }),
       copy({
-        assets: [
-          // You can include directories
-          "src/assets",
+        targets: [
+          { src: "src/config.js", dest: "dist/" },
+          { src: "src/assets/*", dest: "dist/assets" },
         ],
       }),
       vue(baseConfig.plugins.vue),
@@ -122,7 +127,6 @@ if (!argv.format || argv.format === "es") {
           ],
         ],
       }),
-      modify({ "..assets/hourglass.gif": "./assets/hourglass.gif" }),
     ],
   };
   buildFormats.push(esConfig);
@@ -143,17 +147,21 @@ if (!argv.format || argv.format === "cjs") {
     plugins: [
       replace(baseConfig.plugins.replace),
       ...baseConfig.plugins.preVue,
-      css({ output: "bundle.css" }),
+      css({ output: "style.css" }),
       copy({
-        assets: [
-          // You can include directories
-          "src/assets",
+        targets: [
+          { src: "src/config.js", dest: "dist/" },
+          { src: "src/assets/*", dest: "dist/assets" },
         ],
       }),
       vue(baseConfig.plugins.vue),
       ...baseConfig.plugins.postVue,
       babel(baseConfig.plugins.babel),
-      modify({ "..assets/hourglass.gif": "./assets/hourglass.gif" }),
+      modify({
+        "require('../assets/hourglass.gif')":
+          "require('./assets/hourglass.gif')",
+        "require('../config.js')": "require('./config.js')",
+      }),
     ],
   };
   buildFormats.push(umdConfig);
@@ -174,11 +182,11 @@ if (!argv.format || argv.format === "iife") {
     plugins: [
       replace(baseConfig.plugins.replace),
       ...baseConfig.plugins.preVue,
-      css({ output: "bundle.css" }),
+      css({ output: "style.css" }),
       copy({
-        assets: [
-          // You can include directories
-          "src/assets",
+        targets: [
+          { src: "src/config.js", dest: "dist/" },
+          { src: "src/assets/*", dest: "dist/assets" },
         ],
       }),
       vue(baseConfig.plugins.vue),
@@ -189,7 +197,11 @@ if (!argv.format || argv.format === "iife") {
           ecma: 5,
         },
       }),
-      modify({ "..assets/hourglass.gif": "./assets/hourglass.gif" }),
+      modify({
+        "require('../assets/hourglass.gif')":
+          "require('./assets/hourglass.gif')",
+        "require('../config.js')": "require('./config.js')",
+      }),
     ],
   };
   buildFormats.push(unpkgConfig);
