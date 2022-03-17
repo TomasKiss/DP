@@ -221,4 +221,13 @@ export default {
 .p-button{
   text-align: left !important;
 }
+
+/* Very important!! 
+  Solves flickering and freezing of tooltips in Google Chrome,
+  which caused freezing of the whole browser.
+*/
+.p-tooltip {
+pointer-events: none;
+}
+
 </style>

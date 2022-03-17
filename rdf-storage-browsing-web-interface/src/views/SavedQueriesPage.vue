@@ -7,7 +7,7 @@
         <div class="p-col-12">
             <div class="main p-grid">
             <div class="p-col">
-                <h1>Prefix declarations </h1>
+                <h1>Saved queries </h1>
             </div>
             </div>
         </div>  

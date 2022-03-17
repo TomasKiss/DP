@@ -59,11 +59,11 @@
                 <Column  field="namespace" header="Namespace"></Column>
                 <Column  header="Options"> 
                   <template #body="slotProps">
-                      <Button @click="confirmRemove(slotProps.data.prefix)" class="p-button-sm p-button-danger" v-tooltip.right="'Remove'">
-                        <i class="pi pi-trash"></i>
-                      </Button>
                       <Button @click="openEditModal(position,slotProps.data.prefix)" class="p-button-sm margin-right p-button-warning" v-tooltip.right="'Edit'">
                         <i class="pi pi-pencil"></i>
+                      </Button>
+                      <Button @click="confirmRemove(slotProps.data.prefix)" class="p-button-sm p-button-danger" v-tooltip.right="'Remove'">
+                        <i class="pi pi-trash"></i>
                       </Button>
                   </template>
                 </Column>
