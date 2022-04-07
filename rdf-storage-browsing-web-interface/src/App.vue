@@ -2,6 +2,24 @@
   <router-view/>
 </template>
 
+<script>
+import {ApiClient} from './components/ApiClient.js';
+
+export default {
+  name: 'app',
+  data(){
+   return {
+    apiClient: null,
+   }
+  },
+  created(){
+    this.apiClient = new ApiClient();
+  }
+}
+</script>
+
+
+
 <style>
 #app {
   font-family: Avenir, Helvetica, Arial, sans-serif;

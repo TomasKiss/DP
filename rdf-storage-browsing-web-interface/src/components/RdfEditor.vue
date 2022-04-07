@@ -115,7 +115,8 @@
     }),
     mounted() {
       // initial query off all namespaces from the repository
-      this.queryAllNamespaces();
+      this.prefixNsTuples = this.$root.apiClient.queryAllNamespaces(this.$route.params.repo); 
+      console.log(this.prefixNsTuples);
 
       // checking if array for queries exists in the local storage
       if(localStorage.getItem('storedQueries')) {
@@ -163,31 +164,6 @@
         let highlightedCode = highlight(code, languages.sparql); 
 
         return highlightedCode;
-      },
-
-      // fetching all namespaces present in the repository
-      async queryAllNamespaces(){
-        const data = await fetch(config.config.server_url
-              +'api/r/'+this.$route.params.repo+'/repository/namespaces', {
-            method: 'GET',
-            headers: {
-              'Accept':'application/json',
-            },
-          })
-          .then(res =>  {
-            if(!res.ok){
-              this.$toast.add({severity:'error', summary: 'Error', detail:"Error happened during fetch of all namespaces!"});
-            } else { return res.json(); }
-          })
-          .catch((error) => console.log(error))
-
-        // storing namespaces with corresponding prefixes as tuples
-        for (let index = 0; index < data.results.bindings.length; index++) {
-          this.prefixNsTuples.push({
-            'prefix': data.results.bindings[index].prefix.value,
-            'namespace': data.results.bindings[index].namespace.value
-          })
-        }
       },
       
       // executing user given query
