@@ -59,25 +59,17 @@ export class ApiClient {
   //   }
 
   // Data upload to server
-  async uploadDataToServer(url, data, selectedFormat, source, ref) {
-    await fetch(url, {
+  async uploadDataToServer(url, data, selectedFormat) {
+    let response = await fetch(url, {
       method: "POST",
       headers: {
         "Content-Type": selectedFormat,
       },
       body: data,
     })
-      .then((res) => {
-        this.controlUploadResponse(res, source, ref);
-      })
-      .catch((error) =>
-        this.$toast.add({
-          severity: "error",
-          summary: "Error",
-          detail: error,
-          life: 3000,
-        })
-      );
+      .then((res) => res)
+      .catch((error) => error);
+    return response;
   }
 
   // Fetching RDF data from URL
