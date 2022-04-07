@@ -115,8 +115,7 @@
     }),
     mounted() {
       // initial query off all namespaces from the repository
-      this.prefixNsTuples = this.$root.apiClient.queryAllNamespaces(this.$route.params.repo); 
-      console.log(this.prefixNsTuples);
+      this.$root.apiClient.queryAllNamespaces(this.$route.params.repo, this); 
 
       // checking if array for queries exists in the local storage
       if(localStorage.getItem('storedQueries')) {
@@ -198,13 +197,8 @@
         if(this.valid && this.queryType !== "empty"){
           // emit that the fetching of data started, so show spinner
           this.$emit('loadingResult', true);
+
           // CORS headers (filter) have to set in tomcat 9 web.xml file 
-          // answerToQuery = await fetch(config.server_url
-          //     +'rdf4j-server/repositories/'+this.$route.params.repo+'?query='+encodeURIComponent(queryText), {
-          //   method: 'GET',
-          //   headers: {
-          //     'Accept':'application/json',
-          //   },
           let sendQueryToUrl = config.server_url+'api/r/'+this.$route.params.repo;
           // change the URL end based on the type of query
           if(this.queryType == "update"){
@@ -213,20 +207,8 @@
             sendQueryToUrl = sendQueryToUrl + '/repository/query';
           }
 
-          answerToQuery = await fetch(sendQueryToUrl, {
-            method: 'POST',
-            headers: {
-              'Content-Type':'application/sparql-query'
-            },
-            body: queryText,
+          answerToQuery = await this.$root.apiClient.sendSparqlQuery(sendQueryToUrl, queryText, this.queryType, this);
 
-          })
-          .then(res =>
-              this.errorHandler(res),
-          )
-          .catch(error => 
-            this.$toast.add({severity:'error', summary: 'Error', detail:error}),
-          )
           this.valid = !this.valid;
 
           // emit that the fetching of data ended, so hide spinner
@@ -292,23 +274,6 @@
               if (i < 0) break;
           }
           return i;
-      },
-
-      // controlling if server response contains error
-      async errorHandler(res){
-        if(!res.ok){
-          // something went wrong on server (status like: 4xx or 5xx, ...)
-          this.$toast.add({severity:'error', summary: 'Error', detail:"Error happened during execution!", life: 3000});
-        } else {
-
-          this.$toast.add({severity:'success', summary: 'Success Message', detail:'Query was successfully executed!', life: 3000});
-          if(this.queryType != "construct"){
-            return await res.json();
-          } else {
-            return await res.text();
-          }
-          
-        }
       },
 
       // automatic completion of prefixes
