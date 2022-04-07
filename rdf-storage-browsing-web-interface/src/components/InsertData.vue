@@ -13,7 +13,6 @@
             <h3 class="leftText">Upload from URL</h3>
                 <span class="leftText" >
                     <InputText id="url" type="text" v-model="url" class="p-inputtext p-component" placeholder="URL"/>
-                    <!-- <label for="url" class="">URL</label> -->
                 </span>
             </div>
             <div class="p-col-12">
@@ -108,7 +107,7 @@ export default {
                     data = await data.text();
                     let res = await this.$root.apiClient.uploadDataToServer(this.destUrl, data, this.selectedFormat);
                     this.controlUploadResponse(res, "URL");
-
+                    this.url = "";
                 } else {
                     this.$toast.add({severity: "error", summary: "Error", detail: error, life: 3000});
                 }
@@ -118,10 +117,12 @@ export default {
                 // Data upload from File
                 let res = await this.$root.apiClient.uploadDataToServer(this.destUrl, this.file[0], this.selectedFormat);
                 this.controlUploadResponse(res, "File");
+                this.file = "";
             } else if (this.url == "" && this.file == "" && this.textData != ""){
                 // Data upload from Textarea
                 let res = await this.$root.apiClient.uploadDataToServer(this.destUrl, this.textData, this.selectedFormat);
                 this.controlUploadResponse(res, "TextArea");
+                this.textData = "";
             } else {
                 // Error more source selected
                 this.$toast.add({severity: 'error', summary: 'Error', detail: 'Please select just one data source!', life: 3000});
