@@ -126,7 +126,8 @@ export default {
       // if prefix/namespace input was not filled
       prefixEmpty: false,
       namespaceEmpty: false,
-      errorText: 'Namespace is required.'
+      errorText: 'Namespace is required.', 
+      url: config.server_url+'api/r/'+this.$route.params.repo+'/repository/namespaces/'
     }
   },
   async mounted() {
@@ -153,8 +154,7 @@ export default {
     },
     // removal of namespace after confirmation
     async onConfirmRemove(prefixToRemove){
-      const url = config.server_url+'api/r/'+this.$route.params.repo+'/repository/namespaces/'
-      let result = await this.$root.apiClient.removeNamespaceFromRepo(url, prefixToRemove);
+      let result = await this.$root.apiClient.removeNamespaceFromRepo(this.url, prefixToRemove);
       
       if(result.ok) {
         this.$toast.add({severity:'success', summary: 'Successfully removed', detail:'Namespaces was removed.', life: 3000});
@@ -187,7 +187,7 @@ export default {
           this.$toast.add({severity:'error', summary: 'Error', detail: 'Prefix/Namespace already exists!', life: 3000})
         } else {
           // if namespace/prefix doesn't exists -> create
-          let result = this.$root.apiClient.createNamespace(url, this.newNSprefix, this.newNSname);
+          let result = this.$root.apiClient.createNamespace(this.url, this.newNSprefix, this.newNSname);
 
           if(result.ok){
             this.$toast.add({severity:'success', summary: 'Success creation', detail:'New namespaces created', life: 3000});
@@ -227,7 +227,8 @@ export default {
       let exists = this.tableData.data.some(item => item.namespace === this.editedNSname && item.prefix !== this.prefixEditNS);
      
       if(this.editedNSname !== '' && this.editedNSname.match(/(http(s){0,1}:\/\/)\w+/g) && !exists){
-          let result = this.$root.apiClient.createNamespace(url, this.prefixEditNS, this.editedNSname);
+          let result = await this.$root.apiClient.createNamespace(this.url, this.prefixEditNS, this.editedNSname);
+          
           if(result.ok){
             this.$toast.add({severity:'success', summary: 'Successful edit', detail:'Namespace successfully updated!', life: 3000});
             this.tableData.data[this.tableData.data.findIndex(item => item.prefix === this.prefixEditNS)].namespace = this.editedNSname;
@@ -237,8 +238,8 @@ export default {
             this.editedNSname = '';
 
           } else {
-            this.$toast.add({severity:'error', summary: 'Error', detail:error, life: 3000})
-
+            let errMsg = await result.json();
+            this.$toast.add({severity:'error', summary: 'Error', detail:errMsg.message, life: 3000})
           }
 
         this.namespaceEmpty = false;
@@ -262,7 +263,7 @@ export default {
       let data = await this.$root.apiClient.queryAllNamespaces(this.$route.params.repo); 
       
       if(data.ok){
-        data = await data.json();
+        this.allNamespaces = await data.json();
         // Storing namespaces with corresponding prefixes
         for (let index = 0; index < this.allNamespaces.results.bindings.length; index++) {
           this.tableData.data.push({

@@ -189,7 +189,7 @@
           this.queryType = "update";
         } else {
           this.queryType = "empty";
-          this.$toast.add({severity:'error', summary: 'Error', detail:'Query was empty!', life: 3000});
+          this.$toast.add({severity:'error', summary: 'Error', detail:'Query is not supported!', life: 3000});
         }
 
 
