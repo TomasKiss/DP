@@ -229,7 +229,7 @@
           //   headers: {
           //     'Accept':'application/json',
           //   },
-          let sendQueryToUrl = config.config.server_url+'api/r/'+this.$route.params.repo;
+          let sendQueryToUrl = config.server_url+'api/r/'+this.$route.params.repo;
           // change the URL end based on the type of query
           if(this.queryType == "update"){
             sendQueryToUrl = sendQueryToUrl + '/repository/updateQuery';

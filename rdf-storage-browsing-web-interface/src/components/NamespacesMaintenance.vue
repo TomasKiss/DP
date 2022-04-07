@@ -155,7 +155,7 @@ export default {
     async onConfirmRemove(prefixToRemove){
       const res = 
       // await fetch(config.server_url+'rdf4j-server/repositories/1/namespaces/'+prefixToRemove,
-      await fetch(config.config.server_url+'api/r/'+this.$route.params.repo+'/repository/namespaces/'+prefixToRemove,
+      await fetch(config.server_url+'api/r/'+this.$route.params.repo+'/repository/namespaces/'+prefixToRemove,
       {
         method: 'DELETE',
       })
@@ -193,7 +193,7 @@ export default {
           // if namespace/prefix doesn't exists -> create
           const res = 
           // await fetch(config.server_url+'rdf4j-server/repositories/1/namespaces/'+this.newNSprefix,
-          await fetch(config.config.server_url+'api/r/'+this.$route.params.repo+'/repository/namespaces/'+this.newNSprefix,
+          await fetch(config.server_url+'api/r/'+this.$route.params.repo+'/repository/namespaces/'+this.newNSprefix,
           {
             method: 'PUT',
             headers:{
@@ -240,7 +240,7 @@ export default {
       if(this.editedNSname !== '' && this.editedNSname.match(/(http(s){0,1}:\/\/)\w+/g) && !exists){
           const res =
           //  await fetch(config.server_url+'rdf4j-server/repositories/1/namespaces/'+this.prefixEditNS,
-          await fetch(config.config.server_url+'api/r/'+this.$route.params.repo+'/repository/namespaces/'+this.prefixEditNS,
+          await fetch(config.server_url+'api/r/'+this.$route.params.repo+'/repository/namespaces/'+this.prefixEditNS,
           {
             method: 'PUT',
             headers:{
@@ -276,7 +276,7 @@ export default {
     },
     // function to query all namespaces of the given repository
     async queryAllNamespaces(){
-      this.allNamespaces = await fetch(config.config.server_url
+      this.allNamespaces = await fetch(config.server_url
               +'api/r/'+this.$route.params.repo+'/repository/namespaces', {
           method: 'GET',
           headers: {

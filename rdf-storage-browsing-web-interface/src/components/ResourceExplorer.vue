@@ -172,7 +172,7 @@ export default {
          //    },
          // })
 
-         let data = await fetch(config.config.server_url
+         let data = await fetch(config.server_url
               +'api/r/'+this.$route.params.repo+'/repository/query', {
             method: 'POST',
             headers: {
