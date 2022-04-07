@@ -166,23 +166,31 @@ export default {
          let queryText = this.createQuery(resource);   
          let queryToUrl = config.server_url+'api/r/'+this.$route.params.repo+'/repository/query';
 
-         let data = await this.$root.apiClient.sendQueryToUrl(queryToUrl, queryText, "select", this);   
+         let data = await this.$root.apiClient.sendQueryToUrl(queryToUrl, queryText);
+         
+         
+          // Controlling if server response contains error
+          if(data.ok) {
+               this.$toast.add({severity: "success", summary: "Success Message", detail: "Query was successfully executed!",
+               life: 3000});
+               data = await data.text();
 
-         if(data){
-            // initialize needed variables
-            this.tableData.subject = [];
-            this.tableData.predicate = [];
-            this.tableData.object = [];
-            this.res = resource;
-            this.activePanel = 0;
+               // initialize needed variables
+               this.tableData.subject = [];
+               this.tableData.predicate = [];
+               this.tableData.object = [];
+               this.res = resource;
+               this.activePanel = 0;
 
-            // convert response to easier accessible data
-            this.dataProcessing(data);
-         } else {
+               // convert response to easier accessible data
+               this.dataProcessing(data);
+
+
+          } else {
             // show toast about no data found for the resource
             this.$toast.add({severity:'error', summary: 'Error', detail:`No data found for resource:\n ${resource} !`, life: 3000});
-         }
-
+          
+          }
       },
       
       // function creating text of the query

@@ -113,9 +113,9 @@
       // local storage array for storing queries
       storedQueries: []
     }),
-    mounted() {
+    async mounted() {
       // initial query off all namespaces from the repository
-      this.$root.apiClient.queryAllNamespaces(this.$route.params.repo, this); 
+      this.queryNameSpaces();
 
       // checking if array for queries exists in the local storage
       if(localStorage.getItem('storedQueries')) {
@@ -207,7 +207,25 @@
             sendQueryToUrl = sendQueryToUrl + '/repository/query';
           }
 
-          answerToQuery = await this.$root.apiClient.sendSparqlQuery(sendQueryToUrl, queryText, this.queryType, this);
+          answerToQuery = await this.$root.apiClient.sendSparqlQuery(sendQueryToUrl, queryText);
+          
+          // Controlling if server response contains error
+          if(answerToQuery.ok) {
+              this.$toast.add({severity: "success", summary: "Success Message", detail: "Query was successfully executed!",
+              life: 3000});
+
+            if (this.queryType != "construct") {
+              answerToQuery = await answerToQuery.json();
+            } else {
+              answerToQuery = await answerToQuery.text();
+            }
+          } else {
+            // something went wrong on server (status like: 4xx or 5xx, ...)
+            // let errMsg = await answerToQuery.json();
+            this.$toast.add({severity: "error", summary: "Error", detail: "Error happened during execution!",
+            life: 3000});
+          
+          }
 
           this.valid = !this.valid;
 
@@ -375,6 +393,27 @@
 
         }
       },
+
+      async queryNameSpaces(){
+        let data = await this.$root.apiClient.queryAllNamespaces(this.$route.params.repo); 
+        
+        if(data.ok){
+          data = await data.json();
+          // Storing namespaces with corresponding prefixes as tuples
+          for (let index = 0; index < data.results.bindings.length; index++) {
+            this.prefixNsTuples.push({
+              prefix: data.results.bindings[index].prefix.value,
+              namespace: data.results.bindings[index].namespace.value,
+            });
+          }
+        } else {
+          this.$toast.add({
+              severity: "error",
+              summary: "Error",
+              detail: "Error happened during fetch of all namespaces!",
+            });
+        }
+      }
     },
   };
 </script>

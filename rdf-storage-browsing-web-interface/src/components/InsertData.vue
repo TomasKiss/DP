@@ -79,20 +79,21 @@ export default {
                 {name: 'N-Quads', code: 'application/n-quads'},
             ],
             textData: "",
+            destUrl: config.server_url+'api/r/'+this.$route.params.repo+'/repository/statements'
         }
     },
     methods: {
-        // if file upload is selected by user
+        // If file upload is selected by user
         onSelect(event) {
             this.file = event.files;
         },
 
-        // if file upload is canceled by user
+        // If file upload is canceled by user
         onCancel() {
             this.file = "";
         },
         
-        // control if the all needed information is given by user and perform the upload
+        // Control if the all needed information is given by user and perform the upload
         async uploadData() {
             if(this.selectedFormat == ""){
                 // Error no format selected
@@ -101,102 +102,53 @@ export default {
                 // Error no source selected
                 this.$toast.add({severity: 'error', summary: 'Error', detail: 'No data source chosen!', life: 3000});
             } else if (this.url != "" && this.file == "" && this.textData == ""){
-                // Data update from URL source
-                this.$toast.add({severity: 'info', summary: 'Info', detail: 'File Uploaded form URL', life: 3000});
-                await fetch(this.url, {
-                    method: 'GET',
-                    headers: {
-                        // 'Content-Type':this.selectedFormat,
-                    },
+                // Data upload from URL source
+                let data = await this.$root.apiClient.fetchDataFromUrl(this.url, this);
+                if(data.ok){
+                    data = await data.text();
+                    let res = await this.$root.apiClient.uploadDataToServer(this.destUrl, data, this.selectedFormat);
+                    this.controlUploadResponse(res, "URL");
 
-                })
-                .then(res => {
-                    this.uploadFromURL(res);
-                    // this.controlResponse(res, "URL");
-                })
-                .catch(error => 
-                    this.$toast.add({severity:'error', summary: 'Error', detail:error, life: 3000})
-                )
+                } else {
+                    this.$toast.add({severity: "error", summary: "Error", detail: error, life: 3000});
+                }
 
-
+                
             } else if (this.url == "" && this.file != "" && this.textData == ""){
-                // Data update from File
-                // await fetch(config.server_url+'rdf4j-server/repositories/2/statements', 
-                await fetch(config.server_url+'api/r/'+this.$route.params.repo+'/repository/statements', 
-                {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type':this.selectedFormat,
-                    },
-                    body: this.file[0],
-
-                })
-                .then(res => {
-                    this.controlResponse(res, "File");
-                })
-                .catch(error => 
-                    this.$toast.add({severity:'error', summary: 'Error', detail:error, life: 3000}),
-                )
+                // Data upload from File
+                let res = await this.$root.apiClient.uploadDataToServer(this.destUrl, this.file[0], this.selectedFormat);
+                this.controlUploadResponse(res, "File");
             } else if (this.url == "" && this.file == "" && this.textData != ""){
-                // Data update from Textarea
-                // await fetch(config.server_url+'rdf4j-server/repositories/2/statements', 
-                await fetch(config.server_url+'api/r/'+this.$route.params.repo+'/repository/statements', 
-                {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type':this.selectedFormat,
-                    },
-                    body: this.textData,
-
-                })
-                .then(res => {
-                    this.controlResponse(res, "TextArea");
-                })
-                .catch(error => 
-                    this.$toast.add({severity:'error', summary: 'Error', detail:error, life: 3000}),
-                )
+                // Data upload from Textarea
+                let res = await this.$root.apiClient.uploadDataToServer(this.destUrl, this.textData, this.selectedFormat);
+                this.controlUploadResponse(res, "TextArea");
             } else {
                 // Error more source selected
                 this.$toast.add({severity: 'error', summary: 'Error', detail: 'Please select just one data source!', life: 3000});
             }
         },
 
-        async controlResponse(res, source){
+          async controlUploadResponse(res, source) {
             // Control the response status
-            if(res.ok) {
-                this.$toast.add({severity: 'info', summary: 'Success', detail: 'Data Uploaded form '+source, life: 3000});
+            if (res.ok) {
+            this.$toast.add({
+                severity: "info",
+                summary: "Success",
+                detail: "Data Uploaded form " + source,
+                life: 3000,
+            });
             } else {
-                this.$toast.add({severity:'error', summary: 'Error', detail:error, life: 3000});
-            } 
-        },
-
-        async uploadFromURL(res){
-            
-            // Transform data fetched from given URL to basic text
-            let textData = await res.text();
-            console.log(textData);
-
-            await fetch(config.server_url+'api/r/'+this.$route.params.repo+'/repository/statements', 
-            {
-                method: 'POST',
-                headers: {
-                    'Content-Type':this.selectedFormat,
-                },
-                body: this.textData,
-
-            })
-            .then(res2 => {
-                // Control if the update to server was successful
-                this.controlResponse(res2, "URL");
-            })
-            .catch(error => 
-                this.$toast.add({severity:'error', summary: 'Error', detail:error, life: 3000}),
-            )
+            this.$toast.add({
+                severity: "error",
+                summary: "Error",
+                detail: error,
+                life: 3000,
+            });
+            }
         }
     }
 }
 </script>
-
 <style>
 .leftText {
     text-align: left;

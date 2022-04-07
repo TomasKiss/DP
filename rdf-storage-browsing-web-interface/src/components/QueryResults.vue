@@ -13,11 +13,6 @@
           filterDisplay="row"
           v-model:filters="filters"
           >
-          <!-- <template #header>
-              <div class="p-d-flex p-jc-between">
-                <Button type="button" icon="pi pi-filter-slash" label="Clear" class="p-button-outlined" @click="clearFilter()"/>
-              </div>
-            </template> -->
             <template #empty>
               No data found.
             </template>

@@ -131,7 +131,7 @@ export default {
   },
   async mounted() {
     this.loading = true;
-    this.queryAllNamespaces();
+    this.queryNameSpaces();
     this.loading = false;
   },    
   methods:{
@@ -153,20 +153,16 @@ export default {
     },
     // removal of namespace after confirmation
     async onConfirmRemove(prefixToRemove){
-      const res = 
-      // await fetch(config.server_url+'rdf4j-server/repositories/1/namespaces/'+prefixToRemove,
-      await fetch(config.server_url+'api/r/'+this.$route.params.repo+'/repository/namespaces/'+prefixToRemove,
-      {
-        method: 'DELETE',
-      })
-      .then(
-        this.$toast.add({severity:'success', summary: 'Successfully removed', detail:'Namespaces was removed.', life: 3000}),
-
-        this.tableData.data = this.tableData.data.filter(item => item.prefix != prefixToRemove)
-      )
-      .catch(error =>
-        this.$toast.add({severity:'error', summary: 'Error', detail:error, life: 3000}),
-      )
+      const url = config.server_url+'api/r/'+this.$route.params.repo+'/repository/namespaces/'
+      let result = await this.$root.apiClient.removeNamespaceFromRepo(url, prefixToRemove);
+      
+      if(result.ok) {
+        this.$toast.add({severity:'success', summary: 'Successfully removed', detail:'Namespaces was removed.', life: 3000});
+        this.tableData.data = this.tableData.data.filter(item => item.prefix != prefixToRemove);
+      } else {
+        let errMsg = await result.json();
+        this.$toast.add({severity:'error', summary: 'Error', detail: errMsg.message, life: 3000});
+      }
     
     },
     // opening and positioning modal for namespace creation
@@ -191,28 +187,21 @@ export default {
           this.$toast.add({severity:'error', summary: 'Error', detail: 'Prefix/Namespace already exists!', life: 3000})
         } else {
           // if namespace/prefix doesn't exists -> create
-          const res = 
-          // await fetch(config.server_url+'rdf4j-server/repositories/1/namespaces/'+this.newNSprefix,
-          await fetch(config.server_url+'api/r/'+this.$route.params.repo+'/repository/namespaces/'+this.newNSprefix,
-          {
-            method: 'PUT',
-            headers:{
-              'Content-Type': 'text/plain'
-            },
-            body:this.newNSname  
-          }).then(
-            this.$toast.add({severity:'success', summary: 'Success creation', detail:'New namespaces created', life: 3000}),
+          let result = this.$root.apiClient.createNamespace(url, this.newNSprefix, this.newNSname);
+
+          if(result.ok){
+            this.$toast.add({severity:'success', summary: 'Success creation', detail:'New namespaces created', life: 3000});
             this.tableData.data.push({
               'prefix': this.newNSprefix,
               'namespace': this.newNSname
-            }),
+            });
             // clearing inputtext values
-            this.newNSname = '',
-            this.newNSprefix = '',
-
-          ).catch(error =>
-            this.$toast.add({severity:'error', summary: 'Error', detail:error, life: 3000})
-          )
+            this.newNSname = '';
+            this.newNSprefix = '';
+          } else {
+            let errMsg = await result.json();
+            this.$toast.add({severity:'error', summary: 'Error', detail: errMsg.message, life: 3000});
+          }
           
           this.displayCreateModal = false;
           this.prefixEmpty = false;
@@ -238,26 +227,19 @@ export default {
       let exists = this.tableData.data.some(item => item.namespace === this.editedNSname && item.prefix !== this.prefixEditNS);
      
       if(this.editedNSname !== '' && this.editedNSname.match(/(http(s){0,1}:\/\/)\w+/g) && !exists){
-          const res =
-          //  await fetch(config.server_url+'rdf4j-server/repositories/1/namespaces/'+this.prefixEditNS,
-          await fetch(config.server_url+'api/r/'+this.$route.params.repo+'/repository/namespaces/'+this.prefixEditNS,
-          {
-            method: 'PUT',
-            headers:{
-              'Content-Type': 'text/plain'
-            },
-            body:this.editedNSname 
-          }).then(
-            this.$toast.add({severity:'success', summary: 'Successful edit', detail:'Namespace successfully updated!', life: 3000}),
-            this.tableData.data[this.tableData.data.findIndex(item => item.prefix === this.prefixEditNS)].namespace = this.editedNSname,
+          let result = this.$root.apiClient.createNamespace(url, this.prefixEditNS, this.editedNSname);
+          if(result.ok){
+            this.$toast.add({severity:'success', summary: 'Successful edit', detail:'Namespace successfully updated!', life: 3000});
+            this.tableData.data[this.tableData.data.findIndex(item => item.prefix === this.prefixEditNS)].namespace = this.editedNSname;
 
             // clearing input text values
-            this.prefixEditNS = '',
-            this.editedNSname = '',
+            this.prefixEditNS = '';
+            this.editedNSname = '';
 
-          ).catch(error =>
+          } else {
             this.$toast.add({severity:'error', summary: 'Error', detail:error, life: 3000})
-          )
+
+          }
 
         this.namespaceEmpty = false;
         this.submittedDialog = false;
@@ -275,29 +257,25 @@ export default {
 
     },
     // function to query all namespaces of the given repository
-    async queryAllNamespaces(){
-      this.allNamespaces = await fetch(config.server_url
-              +'api/r/'+this.$route.params.repo+'/repository/namespaces', {
-          method: 'GET',
-          headers: {
-            'Accept':'application/json',
-          },
-        })
-        .then(res => this.errorHandler(res))
-        .catch((error) => console.log(error))
+    async queryNameSpaces(){
 
-      for (let index = 0; index < this.allNamespaces.results.bindings.length; index++) {
-        this.tableData.data.push({
-          'prefix': this.allNamespaces.results.bindings[index].prefix.value,
-          'namespace': this.allNamespaces.results.bindings[index].namespace.value
-        })   
-      }
-    },
-    async errorHandler(res){
-      if(!res.ok){
-        this.$toast.add({severity:'error', summary: 'Error', detail:"Error happened during fetch of all namespaces!", life: 3000});
+      let data = await this.$root.apiClient.queryAllNamespaces(this.$route.params.repo); 
+      
+      if(data.ok){
+        data = await data.json();
+        // Storing namespaces with corresponding prefixes
+        for (let index = 0; index < this.allNamespaces.results.bindings.length; index++) {
+          this.tableData.data.push({
+            'prefix': this.allNamespaces.results.bindings[index].prefix.value,
+            'namespace': this.allNamespaces.results.bindings[index].namespace.value
+          })   
+        }
       } else {
-        return await res.json();
+        this.$toast.add({
+            severity: "error",
+            summary: "Error",
+            detail: "Error happened during fetch of all namespaces!",
+          });
       }
     },
   }
