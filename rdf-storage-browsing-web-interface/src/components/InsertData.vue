@@ -102,8 +102,7 @@ export default {
                 this.$toast.add({severity: 'error', summary: 'Error', detail: 'No data source chosen!', life: 3000});
             } else if (this.url != "" && this.file == "" && this.textData == ""){
                 // Data update from URL source
-                this.$toast.add({severity: 'info', summary: 'Success', detail: 'File Uploaded form URL', life: 3000});
-                // https://raw.githubusercontent.com/stardog-union/stardog-tutorials/master/music/beatles.ttl
+                this.$toast.add({severity: 'info', summary: 'Info', detail: 'File Uploaded form URL', life: 3000});
                 await fetch(this.url, {
                     method: 'GET',
                     headers: {
@@ -112,7 +111,8 @@ export default {
 
                 })
                 .then(res => {
-                    this.controlResponse(res, "URL");
+                    this.uploadFromURL(res);
+                    // this.controlResponse(res, "URL");
                 })
                 .catch(error => 
                     this.$toast.add({severity:'error', summary: 'Error', detail:error, life: 3000})
@@ -161,7 +161,7 @@ export default {
             }
         },
 
-        controlResponse(res, source){
+        async controlResponse(res, source){
             // Control the response status
             if(res.ok) {
                 this.$toast.add({severity: 'info', summary: 'Success', detail: 'Data Uploaded form '+source, life: 3000});
@@ -169,6 +169,30 @@ export default {
                 this.$toast.add({severity:'error', summary: 'Error', detail:error, life: 3000});
             } 
         },
+
+        async uploadFromURL(res){
+            
+            // Transform data fetched from given URL to basic text
+            let textData = await res.text();
+            console.log(textData);
+
+            await fetch(config.server_url+'api/r/'+this.$route.params.repo+'/repository/statements', 
+            {
+                method: 'POST',
+                headers: {
+                    'Content-Type':this.selectedFormat,
+                },
+                body: this.textData,
+
+            })
+            .then(res2 => {
+                // Control if the update to server was successful
+                this.controlResponse(res2, "URL");
+            })
+            .catch(error => 
+                this.$toast.add({severity:'error', summary: 'Error', detail:error, life: 3000}),
+            )
+        }
     }
 }
 </script>
