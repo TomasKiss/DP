@@ -1,6 +1,6 @@
 let config = require("../config.js");
 
-export class ApiClient {
+export default class RdfApiClient {
   // Fetching all namespaces present in the repository
   async queryAllNamespaces(repo) {
     const data = await fetch(

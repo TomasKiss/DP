@@ -154,7 +154,7 @@ export default {
     },
     // removal of namespace after confirmation
     async onConfirmRemove(prefixToRemove){
-      let result = await this.$root.apiClient.removeNamespaceFromRepo(this.url, prefixToRemove);
+      let result = await this.$root.rdfApiClient.removeNamespaceFromRepo(this.url, prefixToRemove);
       
       if(result.ok) {
         this.$toast.add({severity:'success', summary: 'Successfully removed', detail:'Namespaces was removed.', life: 3000});
@@ -187,7 +187,7 @@ export default {
           this.$toast.add({severity:'error', summary: 'Error', detail: 'Prefix/Namespace already exists!', life: 3000})
         } else {
           // if namespace/prefix doesn't exists -> create
-          let result = this.$root.apiClient.createNamespace(this.url, this.newNSprefix, this.newNSname);
+          let result = this.$root.rdfApiClient.createNamespace(this.url, this.newNSprefix, this.newNSname);
 
           if(result.ok){
             this.$toast.add({severity:'success', summary: 'Success creation', detail:'New namespaces created', life: 3000});
@@ -227,7 +227,7 @@ export default {
       let exists = this.tableData.data.some(item => item.namespace === this.editedNSname && item.prefix !== this.prefixEditNS);
      
       if(this.editedNSname !== '' && this.editedNSname.match(/(http(s){0,1}:\/\/)\w+/g) && !exists){
-          let result = await this.$root.apiClient.createNamespace(this.url, this.prefixEditNS, this.editedNSname);
+          let result = await this.$root.rdfApiClient.createNamespace(this.url, this.prefixEditNS, this.editedNSname);
           
           if(result.ok){
             this.$toast.add({severity:'success', summary: 'Successful edit', detail:'Namespace successfully updated!', life: 3000});
@@ -260,7 +260,7 @@ export default {
     // function to query all namespaces of the given repository
     async queryNameSpaces(){
 
-      let data = await this.$root.apiClient.queryAllNamespaces(this.$route.params.repo); 
+      let data = await this.$root.rdfApiClient.queryAllNamespaces(this.$route.params.repo); 
       
       if(data.ok){
         this.allNamespaces = await data.json();

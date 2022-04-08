@@ -166,7 +166,7 @@ export default {
          let queryText = this.createQuery(resource);   
          let queryToUrl = config.server_url+'api/r/'+this.$route.params.repo+'/repository/query';
 
-         let data = await this.$root.apiClient.sendSparqlQuery(queryToUrl, queryText);
+         let data = await this.$root.rdfApiClient.sendSparqlQuery(queryToUrl, queryText);
          
          
           // Controlling if server response contains error

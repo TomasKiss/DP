@@ -3,17 +3,17 @@
 </template>
 
 <script>
-import {ApiClient} from './components/ApiClient.js';
+import {RdfApiClient} from './components/RdfApiClient.js';
 
 export default {
   name: 'app',
   data(){
    return {
-    apiClient: null,
+    rdfApiClient: null,
    }
   },
   created(){
-    this.apiClient = new ApiClient();
+    this.rdfApiClient = new RdfApiClient();
   }
 }
 </script>

@@ -60,7 +60,7 @@ npm i "path to created .tgz file"
 * *SavedQueries* - storage and maintenance of user defined queries
 * *InsertData* - form for uploading new data in to the RDF repository 
 * *NamespacesMaintenance* - creation and maintenance of prefixes and namespaces
-
+* *ApiClient* - class performing communication with the server
 
 ## Necessary steps for proper usage of components
 
