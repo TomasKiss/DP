@@ -2,6 +2,24 @@
   <router-view/>
 </template>
 
+<script>
+import {RdfApiClient} from './components/RdfApiClient.js';
+
+export default {
+  name: 'app',
+  data(){
+   return {
+    rdfApiClient: null,
+   }
+  },
+  created(){
+    this.rdfApiClient = new RdfApiClient();
+  }
+}
+</script>
+
+
+
 <style>
 #app {
   font-family: Avenir, Helvetica, Arial, sans-serif;

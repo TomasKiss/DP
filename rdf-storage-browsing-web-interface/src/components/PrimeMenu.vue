@@ -4,7 +4,6 @@
           <img alt="logo" src="../../public/favicon_package_v0.16/favicon-32x32.png" height="40" class="p-mr-2">
       </template>
       <template #end>
-          <!-- <InputText placeholder="Search" type="text" /> -->
       </template>
   </Menubar>
 </template>

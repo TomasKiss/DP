@@ -5,3 +5,4 @@ export { default as SavedQueries } from "./components/SavedQueries.vue";
 export { default as MainComponent } from "./components/MainComponent.vue";
 export { default as RdfEditor } from "./components/RdfEditor.vue";
 export { default as NamespacesMaintenance } from "./components/NamespacesMaintenance.vue";
+export { default as RdfApiClient } from "./components/RdfApiClient.js";

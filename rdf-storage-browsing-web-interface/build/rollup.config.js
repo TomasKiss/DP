@@ -103,6 +103,7 @@ if (!argv.format || argv.format === "es") {
         "require('../assets/hourglass.gif')":
           "require('./assets/hourglass.gif')",
         "require('../config.js')": "require('./config.js')",
+        'require("../config.js")': 'require("./config.js")',
       }),
       replace(baseConfig.plugins.replace),
       ...baseConfig.plugins.preVue,
