@@ -3,7 +3,7 @@
 </template>
 
 <script>
-import {RdfApiClient} from './components/RdfApiClient.js';
+import RdfApiClient from './components/RdfApiClient.js';
 
 export default {
   name: 'app',
