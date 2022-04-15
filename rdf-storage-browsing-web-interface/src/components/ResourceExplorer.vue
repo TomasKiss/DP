@@ -164,9 +164,7 @@ export default {
       async fetchResData(resource) {
          // create query 
          let queryText = this.createQuery(resource);   
-         let queryToUrl = config.server_url+'api/r/'+this.$route.params.repo+'/repository/query';
-
-         let data = await this.$root.rdfApiClient.sendSparqlQuery(queryToUrl, queryText);
+         let data = await this.$root.rdfApiClient.sendSparqlQuery(this.$route.params.repo, queryText, "select");
          
          
           // Controlling if server response contains error

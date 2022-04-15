@@ -198,16 +198,7 @@
           // emit that the fetching of data started, so show spinner
           this.$emit('loadingResult', true);
 
-          // CORS headers (filter) have to set in tomcat 9 web.xml file 
-          let sendQueryToUrl = config.server_url+'api/r/'+this.$route.params.repo;
-          // change the URL end based on the type of query
-          if(this.queryType == "update"){
-            sendQueryToUrl = sendQueryToUrl + '/repository/updateQuery';
-          } else {
-            sendQueryToUrl = sendQueryToUrl + '/repository/query';
-          }
-
-          answerToQuery = await this.$root.apiClient.sendSparqlQuery(sendQueryToUrl, queryText);
+          answerToQuery = await this.$root.rdfApiClient.sendSparqlQuery(this.$route.params.repo, queryText, this.queryType);
           
           // Controlling if server response contains error
           if(answerToQuery.ok) {
@@ -395,7 +386,7 @@
       },
 
       async queryNameSpaces(){
-        let data = await this.$root.apiClient.queryAllNamespaces(this.$route.params.repo); 
+        let data = await this.$root.rdfApiClient.queryAllNamespaces(this.$route.params.repo); 
         
         if(data.ok){
           data = await data.json();

@@ -78,7 +78,6 @@ export default {
                 {name: 'N-Quads', code: 'application/n-quads'},
             ],
             textData: "",
-            destUrl: config.server_url+'api/r/'+this.$route.params.repo+'/repository/statements'
         }
     },
     methods: {
@@ -102,10 +101,10 @@ export default {
                 this.$toast.add({severity: 'error', summary: 'Error', detail: 'No data source chosen!', life: 3000});
             } else if (this.url != "" && this.file == "" && this.textData == ""){
                 // Data upload from URL source
-                let data = await this.$root.rdfApiClient.fetchDataFromUrl(this.url, this);
+                let data = await this.$root.rdfApiClient.fetchDataFromUrl(this.url);
                 if(data.ok){
                     data = await data.text();
-                    let res = await this.$root.rdfApiClient.uploadDataToServer(this.destUrl, data, this.selectedFormat);
+                    let res = await this.$root.rdfApiClient.uploadDataToServer(this.$route.params.repo, data, this.selectedFormat);
                     this.controlUploadResponse(res, "URL");
                     this.url = "";
                 } else {
@@ -115,12 +114,12 @@ export default {
                 
             } else if (this.url == "" && this.file != "" && this.textData == ""){
                 // Data upload from File
-                let res = await this.$root.rdfApiClient.uploadDataToServer(this.destUrl, this.file[0], this.selectedFormat);
+                let res = await this.$root.rdfApiClient.uploadDataToServer(this.$route.params.repo, this.file[0], this.selectedFormat);
                 this.controlUploadResponse(res, "File");
                 this.file = "";
             } else if (this.url == "" && this.file == "" && this.textData != ""){
                 // Data upload from Textarea
-                let res = await this.$root.rdfApiClient.uploadDataToServer(this.destUrl, this.textData, this.selectedFormat);
+                let res = await this.$root.rdfApiClient.uploadDataToServer(this.$route.params.repo, this.textData, this.selectedFormat);
                 this.controlUploadResponse(res, "TextArea");
                 this.textData = "";
             } else {

@@ -89,7 +89,6 @@ import Column from 'primevue/column';
 import Button from 'primevue/button';
 import Dialog from 'primevue/dialog';
 import InputText from 'primevue/inputtext';
-let config = require('../config.js');
 import ConfirmDialog from 'primevue/confirmdialog';
 import Toast from 'primevue/toast';
 
@@ -127,7 +126,6 @@ export default {
       prefixEmpty: false,
       namespaceEmpty: false,
       errorText: 'Namespace is required.', 
-      url: config.server_url+'api/r/'+this.$route.params.repo+'/repository/namespaces/'
     }
   },
   async mounted() {
@@ -154,7 +152,7 @@ export default {
     },
     // removal of namespace after confirmation
     async onConfirmRemove(prefixToRemove){
-      let result = await this.$root.rdfApiClient.removeNamespaceFromRepo(this.url, prefixToRemove);
+      let result = await this.$root.rdfApiClient.removeNamespaceFromRepo(this.$route.params.repo, prefixToRemove);
       
       if(result.ok) {
         this.$toast.add({severity:'success', summary: 'Successfully removed', detail:'Namespaces was removed.', life: 3000});
@@ -227,7 +225,7 @@ export default {
       let exists = this.tableData.data.some(item => item.namespace === this.editedNSname && item.prefix !== this.prefixEditNS);
      
       if(this.editedNSname !== '' && this.editedNSname.match(/(http(s){0,1}:\/\/)\w+/g) && !exists){
-          let result = await this.$root.rdfApiClient.createNamespace(this.url, this.prefixEditNS, this.editedNSname);
+          let result = await this.$root.rdfApiClient.createNamespace(this.$route.params.repo, this.prefixEditNS, this.editedNSname);
           
           if(result.ok){
             this.$toast.add({severity:'success', summary: 'Successful edit', detail:'Namespace successfully updated!', life: 3000});
