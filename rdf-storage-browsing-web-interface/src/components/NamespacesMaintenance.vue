@@ -187,7 +187,7 @@ export default {
           this.$toast.add({severity:'error', summary: 'Error', detail: 'Prefix/Namespace already exists!', life: 3000})
         } else {
           // if namespace/prefix doesn't exists -> create
-          let result = this.$root.rdfApiClient.createNamespace(this.url, this.newNSprefix, this.newNSname);
+          let result = await this.$root.rdfApiClient.createNamespace(this.$route.params.repo, this.newNSprefix, this.newNSname);
 
           if(result.ok){
             this.$toast.add({severity:'success', summary: 'Success creation', detail:'New namespaces created', life: 3000});
