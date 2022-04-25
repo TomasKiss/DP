@@ -22,7 +22,7 @@ export default class RdfApiClient {
   async sendSparqlQuery(repo, queryText, queryType) {
     let sendQueryToUrl = config.server_url + "api/r/" + repo;
     // change the URL end based on the type of query
-    if (this.queryType == "update") {
+    if (queryType == "update") {
       sendQueryToUrl = sendQueryToUrl + "/repository/updateQuery";
     } else {
       sendQueryToUrl = sendQueryToUrl + "/repository/query";
