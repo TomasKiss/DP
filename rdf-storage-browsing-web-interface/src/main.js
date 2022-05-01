@@ -1,3 +1,13 @@
+// //////////////////////////////////
+//  RDF Storage Browsing Web Interface
+//  Author: Tomas Kiss
+//  Login: xkisst00
+//  E-mail: xkisst00@stud.fit.vutbr.cz
+//  University: Brno University of Technology (VUT FIT)
+//  Purpose: Master theses project
+//  Year: 2021/2022
+// //////////////////////////////////
+
 import { createApp } from "vue";
 import App from "./App.vue";
 import PrimeVue from "primevue/config";

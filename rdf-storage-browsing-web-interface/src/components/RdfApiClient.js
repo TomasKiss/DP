@@ -1,7 +1,11 @@
+// Import file containing server url
 let config = require("../config.js");
 
+// Class responsible for performing all HTTP requests
+// which have to be sent to the server
 export default class RdfApiClient {
   // Fetching all namespaces present in the repository
+  // repo - identifier of the repository
   async queryAllNamespaces(repo) {
     const data = await fetch(
       config.server_url + "api/r/" + repo + "/repository/namespaces",
@@ -19,9 +23,12 @@ export default class RdfApiClient {
   }
 
   // Sending SPARQL query to the specified server
+  // repo - identifier of the repository
+  // queryText - query created in editor by the user
+  // queryType - type of the query (select, create, ...)
   async sendSparqlQuery(repo, queryText, queryType) {
     let sendQueryToUrl = config.server_url + "api/r/" + repo;
-    // change the URL end based on the type of query
+    // Change the URL end based on the type of query
     if (queryType == "update") {
       sendQueryToUrl = sendQueryToUrl + "/repository/updateQuery";
     } else {
@@ -38,10 +45,14 @@ export default class RdfApiClient {
       .then((res) => res)
       .catch((error) => error);
 
+    // Return the server response for further processing
     return data;
   }
 
-  // Data upload to server
+  // Data upload to server, insert new data into repository
+  // repo - identifier of the repository
+  // data - RDF data to be inserted into the repository
+  // selectedFormat - data serialization format (Turtle, N-Triples, ...)
   async uploadDataToServer(repo, data, selectedFormat) {
     let response = await fetch(
       config.server_url + "api/r/" + repo + "/repository/statements",
@@ -58,7 +69,8 @@ export default class RdfApiClient {
     return response;
   }
 
-  // Fetching RDF data from URL
+  // Fetching RDF data from user specified URL
+  // url - URL of the data
   async fetchDataFromUrl(url) {
     let data = await fetch(url, {
       method: "GET",
@@ -69,8 +81,12 @@ export default class RdfApiClient {
     return data;
   }
 
+  // Delete namespace represented with user specified
+  // prefix from chosen repository
+  // repo - identifier of the repository
+  // prefixToRemove - prefix of namespace which has to be removed
   async removeNamespaceFromRepo(repo, prefixToRemove) {
-    let res = await fetch(
+    let response = await fetch(
       config.server_url +
         "api/r/" +
         repo +
@@ -80,13 +96,17 @@ export default class RdfApiClient {
         method: "DELETE",
       }
     )
-      .then((response) => response)
+      .then((res) => res)
       .catch((error) => error);
-    return res;
+    return response;
   }
 
+  // Create new namespace with prefix in the chosen repository
+  // repo - identifier of the repository
+  // newNSprefix - prefix of the new namespace
+  // newNSname - name of the new namespace
   async createNamespace(repo, newNSprefix, newNSname) {
-    let res = await fetch(
+    let response = await fetch(
       config.server_url +
         "api/r/" +
         repo +
@@ -103,6 +123,6 @@ export default class RdfApiClient {
       .then((res) => res)
       .catch((error) => error);
 
-    return res;
+    return response;
   }
 }
