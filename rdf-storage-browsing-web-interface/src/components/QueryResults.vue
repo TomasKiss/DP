@@ -4,7 +4,7 @@
 </div>
 
 <div v-else-if="this.result.data[2] != 'clear'">
-    <div v-if="result.data[2] != 'ask' && result.data[2] != 'update'">
+    <div v-if="result.data[2] == 'select' || result.data[2] == 'construct'">
         <DataTable :value="computedResult" responsiveLayout="scroll" 
           :paginator="true" :rows="10"
           paginatorTemplate="CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
@@ -39,10 +39,12 @@
         <i v-if="askRes" class="pi pi-check" style="fontSize: 2rem; color:green; font-weight:bold"></i>
         <i v-else class="pi pi-times" style="fontSize: 2rem; color:red; font-weight:bold"></i>
     </div>
-    <div v-else-if="result.data[2] == 'update'">
-        <h3>The update query was successful
-          <i class="pi pi-check" style="fontSize: 2rem; color:green; font-weight:bold"></i>
+    <div v-else-if="result.data[2] != 'ask'">
+        <h3>The query was {{result.data[0].status =='ok' ? "successful" : "not successful"}}
+          <!-- <i class="pi pi-check" style="fontSize: 2rem; color:green; font-weight:bold"></i> -->
         </h3>
+        <i v-if="result.data[0].status =='ok'" class="pi pi-check" style="fontSize: 2rem; color:green; font-weight:bold"></i>
+        <i v-else class="pi pi-times" style="fontSize: 2rem; color:red; font-weight:bold"></i>
     </div>
 </div>
 
@@ -115,7 +117,7 @@ export default {
           // hide table and ask result
           this.showUserQueryRes = false;
           this.askRes = undefined; 
-           
+          
           if(this.result.data[2] == "ask"){
             // ASK query 
             this.askRes = this.result.data[0].boolean;

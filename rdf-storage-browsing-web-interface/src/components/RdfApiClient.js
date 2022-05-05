@@ -28,8 +28,12 @@ export default class RdfApiClient {
   // queryType - type of the query (select, create, ...)
   async sendSparqlQuery(repo, queryText, queryType) {
     let sendQueryToUrl = config.server_url + "api/r/" + repo;
+
+    // queries which have to be sent to special endpoint
+    let updateQueryTypes = ["update", "insert", "delete"];
+
     // Change the URL end based on the type of query
-    if (queryType == "update") {
+    if (updateQueryTypes.includes(queryType)) {
       sendQueryToUrl = sendQueryToUrl + "/repository/updateQuery";
     } else {
       sendQueryToUrl = sendQueryToUrl + "/repository/query";

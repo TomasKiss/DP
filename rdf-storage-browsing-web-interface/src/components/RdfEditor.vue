@@ -187,6 +187,10 @@
           this.queryType = "select";
         } else if(queryText.toLowerCase().includes("update")){
           this.queryType = "update";
+        } else if(queryText.toLowerCase().includes("insert")){
+          this.queryType = "insert";
+        } else if(queryText.toLowerCase().includes("delete")){
+          this.queryType = "delete";
         } else {
           this.queryType = "empty";
           this.$toast.add({severity:'error', summary: 'Error', detail:'Query is not supported!', life: 3000});
@@ -223,14 +227,17 @@
           // emit that the fetching of data ended, so hide spinner
           this.$emit('loadingResult', false);
 
+          // queries without concrete result sent back from servers
+          let updateQueryTypes = ["update", "insert", "delete"];
+
           // emit answer if everything was OK and data was found
           if((this.queryType == "ask" && 'boolean' in answerToQuery) || 
             (this.queryType == "select" && answerToQuery.results.bindings.length > 0) ||
             (this.queryType == "construct" &&  answerToQuery.length > 0) ||
-            (this.queryType == "update" && 'status' in answerToQuery)) 
+            (updateQueryTypes.includes(this.queryType) && 'status' in answerToQuery)) 
           {
             let data = [answerToQuery, this.prefixNsTuples, this.queryType];
-            this.$emit('resultReturn', {data});
+           this.$emit('resultReturn', {data});
           } else {
             // no data found for the query
             let data = ['', '', 'clear'];
